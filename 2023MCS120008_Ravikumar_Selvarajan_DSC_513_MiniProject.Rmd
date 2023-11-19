@@ -728,12 +728,9 @@ New_Airport_delay <- Airport_delay[complete.cases(Airport_delay),]
 View(New_Airport_delay)
 
 ```
-
-
 ## Detect outliers Clean Datasets
 ## Since our analysis is to find if extreme weather conditions affect the flight traffic, we are 
 ## really looking for outliers unlike normal cases where we tend to avoid outliers
-
 ## Exploratoray Analysis of Bangalore Weather Dataset
 ```{r}
 View(New_Weather_Bangalore)
@@ -1294,7 +1291,6 @@ View(Delhi_cohesive_dataset)
 ```
 
 ## Analyse cohesive dataset a bit to understand how delay and other parameters plot each other
-
 ```{r}
 View(Delhi_cohesive_dataset)
 names(Delhi_cohesive_dataset)
@@ -1394,7 +1390,6 @@ fmodel(Delhi_Traffic_Delay_Model_CO)
 ```
 
 ## Model for predicting Delhi air traffic delays
-
 ```{r}
 
 
