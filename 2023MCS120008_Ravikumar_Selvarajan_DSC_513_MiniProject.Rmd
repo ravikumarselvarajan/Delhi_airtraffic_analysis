@@ -1,0 +1,1404 @@
+---
+title: "2023MCS120008_Ravikumar_Selvarajan_DSC_513_MiniProject"
+author: "2023MCS120008_Ravikumar_Selvarajan"
+date: "11/19/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(lazyeval)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(mosaic)
+library(mosaicData)
+install.packages("datasets/statisticalModeling_0.3.0.tar.gz", repos = NULL, type = "source")
+library(statisticalModeling)
+Weather_Station <- read.csv("./datasets/Station_GeoLocation_Longitute_Latitude_Elevation_EPSG_4326.csv")
+Weather_Bangalore <- read.csv("./datasets/Bangalore_1990_2022_BangaloreCity.csv")
+Weather_Chennai <- read.csv("./datasets/Chennai_1990_2022_Madras.csv")                        
+Weather_Delhi <- read.csv("./datasets/Delhi_NCR_1990_2022_Safdarjung.csv")
+Weather_Lucknow <- read.csv("./datasets/Lucknow_1990_2022.csv")                           
+Weather_Mumbai <- read.csv("./datasets/Mumbai_1990_2022_Santacruz.csv")
+Weather_Jodhpur <- read.csv("./datasets/Rajasthan_1990_2022_Jodhpur.csv")                               
+Weather_Bhubhneshwar <- read.csv("./datasets/weather_Bhubhneshwar_1990_2022.csv")
+Weather_Rourkela <- read.csv("./datasets/weather_Rourkela_2021_2022.csv")
+AQ_stations <- read.csv("./datasets/stations.csv")                       
+AQ_station_hour <- read.csv("./datasets/station_hour.csv")                                              
+AQ_station_day <- read.csv("./datasets/station_day.csv")                                               
+AQ_city_day <- read.csv("./datasets/city_day.csv")
+AQ_city_hour <- read.csv("./datasets/city_hour.csv")                                                 
+Airport_delay <- read.csv("./Aiport_Delay.csv")
+```
+
+## #################### Exploratory Data Analysis ###################### ##
+
+## Station_GeoLocation_Longitute_Latitude_Elevation_EPSG_4326.csv
+```{r}
+## Have a look at the data
+View(Weather_Station)
+
+print ("The dimensions of the dataset")
+dim(Weather_Station)
+
+print("Lets have a glimpse of the dataset")
+glimpse(Weather_Station)
+
+print("Lets find the column names of the dataset")
+names(Weather_Station)
+
+print("Lets find the structure of the dataset")
+str(Weather_Station)
+
+print("Lets find the summary of the dataset")
+summary(Weather_Station)
+
+
+attach(Weather_Station)
+## Only Elevation seems to have some missing data, lets zoom into them
+Weather_Station[is.na(Elevation),]
+## Nothing special about why Bubhneshwar and Rourkela alone seems to have elevation missing
+## No cleaning needed as there are no plans to make use of the elevation data of the stations
+
+## To find outliers, draw a histogram
+
+```
+## Bangalore_1990_2022_BangaloreCity.csv
+```{r}
+## Have a look at the data
+View(Weather_Bangalore)
+
+print ("The dimensions of the dataset")
+dim(Weather_Bangalore)
+
+print("Lets have a glimpse of the dataset")
+glimpse(Weather_Bangalore)
+
+print("Lets see the head of the dataset")
+head(Weather_Bangalore)
+
+print("Lets see the tail of the dataset")
+tail(Weather_Bangalore)
+
+print("Lets find the column names of the dataset")
+all_columns <- names(Weather_Bangalore)
+
+print("Lets find the structure of the dataset")
+str(Weather_Bangalore)
+
+print("Lets find the summary of the dataset")
+summary(Weather_Bangalore)
+
+print("Lets get the unique records the dataset")
+unique(Weather_Bangalore)
+
+attach(Weather_Bangalore)
+## Lets see the table with values for missing time
+Weather_Bangalore[is.na(time),]
+## Ok looks time is all good
+
+## Now Lets see the table with values for missing tavg
+Weather_Bangalore[is.na(tavg),]
+## Ok there are 70 entries and tavg is NA only when tmin, tmax and precipitation is all NA
+
+Weather_Bangalore[is.na(tmin),]
+## About 1389 entries are NA
+
+Weather_Bangalore[is.na(tmax),]
+## About 629 entries are NA
+
+Weather_Bangalore[is.na(prcp),]
+## About 4620 entries are NA
+
+
+```
+
+
+## Chennai_1990_2022_Madras.csv
+```{r}
+## Have a look at the data
+View(Weather_Chennai)
+
+print ("The dimensions of the dataset")
+dim(Weather_Chennai)
+
+print("Lets have a glimpse of the dataset")
+glimpse(Weather_Chennai)
+
+print("Lets see the head of the dataset")
+head(Weather_Chennai)
+
+print("Lets see the tail of the dataset")
+tail(Weather_Chennai)
+
+print("Lets find the column names of the dataset")
+all_columns <- names(Weather_Chennai)
+
+print("Lets find the structure of the dataset")
+str(Weather_Chennai)
+
+print("Lets find the summary of the dataset")
+summary(Weather_Chennai)
+
+print("Lets get the unique records the dataset")
+unique(Weather_Chennai)
+
+attach(Weather_Chennai)
+## Lets see the table with values for missing time
+Weather_Chennai[is.na(time),]
+## Ok looks time is all good
+
+## Now Lets see the table with values for missing tavg
+Weather_Chennai[is.na(tavg),]
+## Ok there are 27 entries and tavg is NA only when tmin, tmax and precipitation is all NA
+
+Weather_Chennai[is.na(tmin),]
+## About 3084 entries are NA
+
+Weather_Chennai[is.na(tmax),]
+## About 1019 entries are NA
+
+Weather_Chennai[is.na(prcp),]
+## About 4886 entries are NA
+```
+
+## Delhi_NCR_1990_2022_Safdarjung.csv
+```{r}
+## Have a look at the data
+View(Weather_Delhi)
+
+print ("The dimensions of the dataset")
+dim(Weather_Delhi)
+
+print("Lets have a glimpse of the dataset")
+glimpse(Weather_Delhi)
+
+print("Lets see the head of the dataset")
+head(Weather_Delhi)
+
+print("Lets see the tail of the dataset")
+tail(Weather_Delhi)
+
+print("Lets find the column names of the dataset")
+all_columns <- names(Weather_Delhi)
+
+print("Lets find the structure of the dataset")
+str(Weather_Delhi)
+
+print("Lets find the summary of the dataset")
+summary(Weather_Delhi)
+
+print("Lets get the unique records the dataset")
+unique(Weather_Delhi)
+
+attach(Weather_Delhi)
+## Lets see the table with values for missing time
+Weather_Delhi[is.na(time),]
+## Ok looks time is all good
+
+## Now Lets see the table with values for missing tavg
+Weather_Delhi[is.na(tavg),]
+## Ok there are 94 entries and tavg is NA only when tmin, tmax and precipitation is all NA
+
+Weather_Delhi[is.na(tmin),]
+## About 1536 entries are NA
+
+Weather_Delhi[is.na(tmax),]
+## About 533 entries are NA
+
+Weather_Delhi[is.na(prcp),]
+## About 6140 entries are NA
+```
+
+## Lucknow_1990_2022.csv
+```{r}
+## Have a look at the data
+View(Weather_Lucknow)
+
+print ("The dimensions of the dataset")
+dim(Weather_Lucknow)
+
+print("Lets have a glimpse of the dataset")
+glimpse(Weather_Lucknow)
+
+print("Lets see the head of the dataset")
+head(Weather_Lucknow)
+
+print("Lets see the tail of the dataset")
+tail(Weather_Lucknow)
+
+print("Lets find the column names of the dataset")
+all_columns <- names(Weather_Lucknow)
+
+print("Lets find the structure of the dataset")
+str(Weather_Lucknow)
+
+print("Lets find the summary of the dataset")
+summary(Weather_Lucknow)
+
+print("Lets get the unique records the dataset")
+unique(Weather_Lucknow)
+
+attach(Weather_Lucknow)
+## Lets see the table with values for missing time
+Weather_Lucknow[is.na(time),]
+## Ok looks time is all good
+
+## Now Lets see the table with values for missing tavg
+Weather_Lucknow[is.na(tavg),]
+## Ok there are 138 entries and tavg is NA only when tmin, tmax and precipitation is all NA
+
+Weather_Lucknow[is.na(tmin),]
+## About 3515 entries are NA
+
+Weather_Lucknow[is.na(tmax),]
+## About 1553 entries are NA
+
+Weather_Lucknow[is.na(prcp),]
+## About 6152 entries are NA
+```
+
+## Mumbai_1990_2022_Santacruz.csv
+```{r}
+## Have a look at the data
+View(Weather_Mumbai)
+
+print ("The dimensions of the dataset")
+dim(Weather_Mumbai)
+
+print("Lets have a glimpse of the dataset")
+glimpse(Weather_Mumbai)
+
+print("Lets see the head of the dataset")
+head(Weather_Mumbai)
+
+print("Lets see the tail of the dataset")
+tail(Weather_Mumbai)
+
+print("Lets find the column names of the dataset")
+all_columns <- names(Weather_Mumbai)
+
+print("Lets find the structure of the dataset")
+str(Weather_Mumbai)
+
+print("Lets find the summary of the dataset")
+summary(Weather_Mumbai)
+
+print("Lets get the unique records the dataset")
+unique(Weather_Mumbai)
+
+attach(Weather_Mumbai)
+## Lets see the table with values for missing time
+Weather_Mumbai[is.na(time),]
+## Ok looks time is all good
+
+## Now Lets see the table with values for missing tavg
+Weather_Mumbai[is.na(tavg),]
+## Ok there are 11 entries and tavg is NA only when tmin, tmax and precipiation is all NA
+
+Weather_Mumbai[is.na(tmin),]
+## About 2454 entries are NA
+
+Weather_Mumbai[is.na(tmax),]
+## About 1907 entries are NA
+
+Weather_Mumbai[is.na(prcp),]
+## About 4681 entries are NA
+
+```
+
+## Rajasthan_1990_2022_Jodhpur.csv
+```{r}
+## Have a look at the data
+View(Weather_Jodhpur)
+
+print ("The dimensions of the dataset")
+dim(Weather_Jodhpur)
+
+print("Lets have a glimpse of the dataset")
+glimpse(Weather_Jodhpur)
+
+print("Lets see the head of the dataset")
+head(Weather_Jodhpur)
+
+print("Lets see the tail of the dataset")
+tail(Weather_Jodhpur)
+
+print("Lets find the column names of the dataset")
+all_columns <- names(Weather_Jodhpur)
+
+print("Lets find the structure of the dataset")
+str(Weather_Jodhpur)
+
+print("Lets find the summary of the dataset")
+summary(Weather_Jodhpur)
+
+print("Lets get the unique records the dataset")
+unique(Weather_Jodhpur)
+
+attach(Weather_Jodhpur)
+## Lets see the table with values for missing time
+Weather_Jodhpur[is.na(time),]
+## Ok looks time is all good
+
+## Now Lets see the table with values for missing tavg
+Weather_Jodhpur[is.na(tavg),]
+## Ok there are 70 entries and tavg is NA only when tmin, tmax and precipiation is all NA
+
+Weather_Jodhpur[is.na(tmin),]
+## About 1389 entries are NA
+
+Weather_Jodhpur[is.na(tmax),]
+## About 629 entries are NA
+
+Weather_Jodhpur[is.na(prcp),]
+## About 4620 entries are NA
+
+```
+
+## weather_Bhubhneshwar_1990_2022.csv")
+```{r}
+## Have a look at the data
+View(Weather_Bhubhneshwar)
+#definitely has more columns than the cities that we have seen so far
+
+print ("The dimensions of the dataset")
+dim(Weather_Bhubhneshwar)
+#OK, so we have 11 columns, 6 more than others
+
+print("Lets have a glimpse of the dataset")
+glimpse(Weather_Bhubhneshwar)
+
+print("Lets see the head of the dataset")
+head(Weather_Bhubhneshwar)
+
+print("Lets see the tail of the dataset")
+tail(Weather_Bhubhneshwar)
+
+print("Lets find the column names of the dataset")
+names(Weather_Bhubhneshwar)
+
+## So the additional columns are: snow, wind direction, wind speed, wind pgt, pressure and tsunami
+
+print("Lets find the structure of the dataset")
+str(Weather_Bhubhneshwar)
+
+print("Lets find the summary of the dataset")
+summary(Weather_Bhubhneshwar)
+
+print("Lets get the unique records the dataset")
+unique(Weather_Bhubhneshwar)
+
+attach(Weather_Bhubhneshwar)
+## Lets see the table with values for missing time
+Weather_Bhubhneshwar[is.na(time),]
+## Ok looks time is all good
+
+## Now Lets see the table with values for missing tavg
+Weather_Bhubhneshwar[is.na(tavg),]
+## Ok there are 78 entries and tavg is NA only when tmin, tmax, precipiation, wind parameters, snow and tsun are all NA
+
+Weather_Bhubhneshwar[is.na(tmin),]
+## About 2090 entries are NA
+
+Weather_Bhubhneshwar[is.na(tmax),]
+## About 891 entries are NA
+
+Weather_Bhubhneshwar[is.na(prcp),]
+## About 5097 entries are NA
+
+## Looks like snow is all NA. Lets see if there are anything with proper values
+Weather_Bhubhneshwar[is.na(snow) == FALSE,]
+## Yes, snow is all NA in the dataset
+
+Weather_Bhubhneshwar[is.na(wdir),]
+## About 10641 entries are NA
+
+Weather_Bhubhneshwar[is.na(wspd),]
+## About 9806 entries are NA
+
+Weather_Bhubhneshwar[is.na(pres),]
+## About 10692 entries are NA
+
+## Looks like tsun is all NA. Lets see if there are anything with proper values
+Weather_Bhubhneshwar[is.na(tsun) == FALSE,]
+## Yes, tsun is all NA in the dataset
+```
+
+## weather_Rourkela_2021_2022.csv")
+```{r}
+## Have a look at the data
+View(Weather_Rourkela)
+#definitely has more columns than the cities that we have seen so far
+
+print ("The dimensions of the dataset")
+dim(Weather_Rourkela)
+#OK, so we have 11 columns, 6 more than others
+
+print("Lets have a glimpse of the dataset")
+glimpse(Weather_Rourkela)
+
+print("Lets see the head of the dataset")
+head(Weather_Rourkela)
+
+print("Lets see the tail of the dataset")
+tail(Weather_Rourkela)
+
+print("Lets find the column names of the dataset")
+names(Weather_Rourkela)
+
+## So the additional columns are: snow, wind direction, wind speed, wind pgt, pressure and tsunami
+
+print("Lets find the structure of the dataset")
+str(Weather_Rourkela)
+
+print("Lets find the summary of the dataset")
+summary(Weather_Rourkela)
+
+print("Lets get the unique records the dataset")
+unique(Weather_Rourkela)
+
+attach(Weather_Rourkela)
+## Lets see the table with values for missing time
+Weather_Rourkela[is.na(time),]
+## Ok looks time is all good
+
+## Now Lets see the table with values for missing tavg
+Weather_Rourkela[is.na(tavg),]
+## Ok there are 2 entries and tavg is NA only when tmin, tmax, precipiation, wind parameters, snow and tsun are all NA
+
+Weather_Rourkela[is.na(tmin),]
+## Ok there are 2 entries and tmin is NA only when tavg, tmax, precipiation, wind parameters, snow and tsun are all NA
+
+Weather_Rourkela[is.na(tmax),]
+## Ok there are 2 entries and tmax is NA only when tavg, tmin, precipiation, wind parameters, snow and tsun are all NA
+
+
+Weather_Rourkela[is.na(prcp),]
+## Ok there are 3 entries with na for prcp - 1 extra than what we had for tmin/tmax/tavg.
+
+## Looks like snow is all NA. Lets see if there are anything with proper values
+Weather_Rourkela[is.na(snow) == FALSE,]
+## Yes, snow is all NA in the dataset
+
+Weather_Rourkela[is.na(wdir),]
+##Same 2 datasets has wdir as NA
+
+Weather_Rourkela[is.na(wspd),]
+##Same 2 datasets has wdirwspd as NA
+
+Weather_Rourkela[is.na(pres),]
+##Same 2 datasets has pressure as NA
+
+## Looks like tsun is all NA. Lets see if there are anything with proper values
+Weather_Rourkela[is.na(tsun) == FALSE,]
+## Yes, tsun is all NA in the dataset
+```
+
+
+
+
+## AQI stations: stations.csv
+```{r}
+## Have a look at the data
+View(AQ_stations)
+
+print ("The dimensions of the dataset")
+dim(AQ_stations)
+
+print("Lets have a glimpse of the dataset")
+glimpse(AQ_stations)
+
+print("Lets find the column names of the dataset")
+names(AQ_stations)
+
+print("Lets find the structure of the dataset")
+str(AQ_stations)
+
+print("Lets find the summary of the dataset")
+summary(AQ_stations)
+
+
+attach(AQ_stations)
+
+AQ_stations [AQ_stations == ""] <- NA
+## There is no records with NA but there are records with missing data.
+## Lets fill them with NA and then find it.
+AQ_stations[is.na(Status),]
+## There are 97 entries with stats not known
+```
+## AQI Station Hour wise - station_hour.csv
+```{r}
+## Have a look at the data
+View(AQ_station_hour)
+
+print ("The dimensions of the dataset")
+dim(AQ_station_hour)
+
+print("Lets have a glimpse of the dataset")
+glimpse(AQ_station_hour)
+
+print("Lets find the column names of the dataset")
+names(AQ_station_hour)
+
+print("Lets find the structure of the dataset")
+str(AQ_station_hour)
+
+print("Lets find the summary of the dataset")
+summary(AQ_station_hour)
+
+attach(AQ_station_hour)
+
+AQ_station_hour [AQ_station_hour == ""] <- NA
+
+## So the air quality seems to be dependent on 12 parameters
+## There are too many NAs/missing data amongst them:
+## PM2.5:647689  PM10:1119252 NO:553711       NO2:528973      NOx:490808  CO:1236618 
+## SO2:499302    O3:742737    Benzene:725973  Toluene:861579  Xylene:1042366
+
+AQ_station_hour %>% group_by(AQI_Bucket)%>%count()
+## Looks like Moderate entries are the highest ones but second highest is NA entries...
+```
+
+## AQ_station_day  - station_day.csv
+```{r}
+## Have a look at the data
+View(AQ_station_day)
+
+print ("The dimensions of the dataset")
+dim(AQ_station_day)
+
+print("Lets have a glimpse of the dataset")
+glimpse(AQ_station_day)
+
+print("Lets find the column names of the dataset")
+names(AQ_station_day)
+
+print("Lets find the structure of the dataset")
+str(AQ_station_day)
+
+print("Lets find the summary of the dataset")
+summary(AQ_station_day)
+
+attach(AQ_station_day)
+
+AQ_station_day [AQ_station_day == ""] <- NA
+
+## So the air quality seems to be dependent on 12 parameters
+## There are too many NAs/missing data amongst them:
+## PM2.5: 21625 PM10: 42706 NO: 17106 NO2: 16547 NOx: 15500 NH3: 48105 
+## CO:  12998  SO2: 25204  O3: 25568 Benzene: 31455 Toluene: 38702 Xylene: 85137
+AQ_station_day %>% group_by(AQI_Bucket)%>%count()
+## Looks like Moderate entries are the highest ones, followed by Satisfactory 
+## but third highest is NA entries...
+
+```
+## AQ_city_day <- read.csv("./datasets/city_day.csv")
+```{r}
+## Have a look at the data
+View(AQ_city_day)
+
+print ("The dimensions of the dataset")
+dim(AQ_city_day)
+
+print("Lets have a glimpse of the dataset")
+glimpse(AQ_city_day)
+
+print("Lets find the column names of the dataset")
+names(AQ_city_day)
+
+print("Lets find the structure of the dataset")
+str(AQ_city_day)
+
+print("Lets find the summary of the dataset")
+summary(AQ_city_day)
+
+attach(AQ_city_day)
+
+AQ_city_day [AQ_city_day == ""] <- NA
+
+## So the air quality seems to be dependent on 12 parameters
+## There are too many NAs/missing data amongst them:
+
+## PM2.5: 4598  PM10: 11140  NO: 3582  NO2: 3585 NOx: 4185 NH3: 10328 
+## CO: 2059  SO2: 3854 O3: 4022  Benzene: 5623  Toluene: 8041 Xylene: 18109
+AQ_city_day %>% group_by(AQI_Bucket)%>%count()
+## Looks like Moderate entries are the highest ones, followed by Satisfactory 
+## but third highest is NA entries...
+```
+
+
+## AQ_city_hour: city_hour.csv
+```{r}
+## Have a look at the data
+View(AQ_city_hour)
+
+print ("The dimensions of the dataset")
+dim(AQ_city_hour)
+
+print("Lets have a glimpse of the dataset")
+glimpse(AQ_city_hour)
+
+print("Lets find the column names of the dataset")
+names(AQ_city_hour)
+
+print("Lets find the structure of the dataset")
+str(AQ_city_hour)
+
+print("Lets find the summary of the dataset")
+summary(AQ_city_hour)
+
+attach(AQ_city_hour)
+
+AQ_city_hour [AQ_city_hour == ""] <- NA
+
+## So the air quality seems to be dependent on 12 parameters
+## There are too many NAs/missing data amongst them:
+## PM2.5: 145088 PM10: 296737 NO: 116632   NO2: 117122  NOx: 123224 NH3:  272542     
+## CO: 86517  SO2: 130373   O3: 129208 Benzene: 163646   Toluene: 220607 Xylene: 455829   
+AQ_city_hour %>% group_by(AQI_Bucket)%>%count()
+## Looks like Moderate entries are the highest ones, followed by Satisfactory 
+## but third highest is NA entries...
+```
+
+## Airport_delay: Aiport_Delay.csv
+```{r}
+## Have a look at the data
+View(Airport_delay)
+
+print ("The dimensions of the dataset")
+dim(Airport_delay)
+
+print("Lets have a glimpse of the dataset")
+glimpse(Airport_delay)
+
+print("Lets find the column names of the dataset")
+names(Airport_delay)
+
+print("Lets find the structure of the dataset")
+str(Airport_delay)
+
+print("Lets find the summary of the dataset")
+summary(Airport_delay)
+
+attach(Airport_delay)
+
+Airport_delay [Airport_delay == ""] <- NA
+
+Airport_delay %>% group_by(Departure.Airport, Departure.Airport.On.Time.Rating..out.of.10.)%>%summarize()
+##Mumbai seems to have the worst rating for departure on time performance
+
+Airport_delay %>% group_by(Arrival.Airport, Arrival.Airport.On.Time.Rating..out.of.10.)%>%summarize()
+##Mumbai seems to have the worst rating for Arrival on time performance as well
+
+```
+
+
+
+## #################### Cleaning Datasets ###################### ##
+```{r}
+## Remove the entries from the table where tavg is NA
+New_Weather_Bangalore <- Weather_Bangalore[complete.cases(Weather_Bangalore),]
+New_Weather_Delhi <- Weather_Delhi[complete.cases(Weather_Delhi),]
+New_Weather_Lucknow <- Weather_Lucknow[complete.cases(Weather_Lucknow),]
+New_Weather_Mumbai <- Weather_Mumbai[complete.cases(Weather_Mumbai),]
+New_Weather_Jodhpur <- Weather_Jodhpur[complete.cases(Weather_Jodhpur),]
+
+## For Bhubhenshwar and Rourkela, we need to first remove the columns snow and tsun which has no valid entries
+## We can also remove the wdir, wspd, pressure columns as the other stations are not having them
+## And hence having them does not seem to add value for the scope of this analysis
+Standard_Weather_Bhubhneshwar <- subset(Weather_Bhubhneshwar, select = -c(snow,wdir,wspd,pres,tsun,wpgt))
+New_Weather_Bhubhneshwar <- Standard_Weather_Bhubhneshwar[complete.cases(Standard_Weather_Bhubhneshwar),] 
+
+Standard_Weather_Rourkela <- subset(Weather_Rourkela, select = -c(snow,wdir,wspd,pres,tsun,wpgt))
+New_Weather_Rourkela <- Standard_Weather_Rourkela[complete.cases(Standard_Weather_Rourkela),] 
+
+
+## When it comes to AQI stations, we need only active stations
+
+New_AQ_stations <- AQ_stations %>% filter(Status == "Active")
+New_AQ_station_hour <- AQ_station_hour[complete.cases(AQ_station_hour),]
+New_AQ_station_day <- AQ_station_day[complete.cases(AQ_station_day),]
+New_AQ_city_hour <- AQ_city_hour[complete.cases(AQ_city_hour),]
+New_AQ_city_day <- AQ_city_day[complete.cases(AQ_city_day),]
+
+## Clean the Airport Delay data too
+New_Airport_delay <- Airport_delay[complete.cases(Airport_delay),]
+View(New_Airport_delay)
+
+```
+
+
+## Detect outliers Clean Datasets
+## Since our analysis is to find if extreme weather conditions affect the flight traffic, we are 
+## really looking for outliers unlike normal cases where we tend to avoid outliers
+
+## Exploratoray Analysis of Bangalore Weather Dataset
+```{r}
+View(New_Weather_Bangalore)
+hist(x=New_Weather_Bangalore$tavg, main = "Bangalore Average Temparature")
+## Data outside <20 and >30 are outliers for Bangalore average 
+
+hist(x=New_Weather_Bangalore$tmin, main = "Bangalore Min Temparature")
+## Data outside <16 are outliers for Bangalore min 
+
+hist(x=New_Weather_Bangalore$tmax, main = "Bangalore Max  Temparature")
+## Data outside >35 are outliers for Bangalore min 
+
+hist(x=New_Weather_Bangalore$prcp, main = "Bangalore Precipitation", breaks = 5)
+## Extreme cases are above 50
+
+## So lets make special dataset
+Special_Weather_Bangalore <- New_Weather_Bangalore %>% filter((tavg < 20) | (tavg>30) | (tmin < 16) | (tmax > 35) | (prcp > 50))
+View(Special_Weather_Bangalore)
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Special_Weather_Bangalore, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Special_Weather_Bangalore$prcp/75) +
+  labs(title = "Impact of temperature on precipitation")
+
+## From the picture looks like the extreme precipitation happens either during when tmin is between 16 to 22
+## So, lets put a special filter around that and redraw
+Ext_Special_Weather_Bangalore <- Special_Weather_Bangalore %>% filter((tmin > 16) & (tmin < 22))
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Ext_Special_Weather_Bangalore, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Ext_Special_Weather_Bangalore$prcp/75) +
+  labs(title = "Impact of temperature on precipitation")
+```
+
+## Exploratory Analysis of Chennai Weather Dataset
+## Exploratory Analysis of Delhi Weather Dataset
+```{r}
+View(New_Weather_Delhi)
+hist(x=New_Weather_Delhi$tavg, main = "Delhi Average Temparature")
+## Data outside <15 and >35 are outliers for Delhi average 
+
+hist(x=New_Weather_Delhi$tmin, main = "Delhi Min Temparature")
+## Data outside <16 are outliers for Delhi min 
+
+hist(x=New_Weather_Delhi$tmax, main = "Delhi Max  Temparature")
+## Data outside >35 are outliers for Delhi min 
+
+hist(x=New_Weather_Delhi$prcp, main = "Delhi Precipitation", breaks = 5)
+## Extreme cases are above 50
+
+## So lets make special dataset
+Special_Weather_Delhi <- New_Weather_Delhi %>% filter((tavg < 15) | (tavg>35) | (tmin < 10) | (tmax > 30) | (prcp > 50))
+View(Special_Weather_Delhi)
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Special_Weather_Delhi, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Special_Weather_Delhi$prcp/50) +
+  labs(title = "Impact of temperature on precipitation")
+
+## From the picture looks like the extreme precipitation happens either during when tmin is between 20 to 30
+## So, lets put a special filter around that and redraw
+Ext_Special_Weather_Delhi <- Special_Weather_Delhi %>% filter((tmin > 20) & (tmin < 30))
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Ext_Special_Weather_Delhi, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Ext_Special_Weather_Delhi$prcp/75) +
+  labs(title = "Impact of temperature on precipitation")
+```
+
+
+## Exploratory Analysis of Lucknow Weather Dataset
+```{r}
+View(New_Weather_Lucknow)
+hist(x=New_Weather_Lucknow$tavg, main = "Lucknow Average Temparature")
+## Data outside <16 and >33 are outliers for Lucknow average 
+
+hist(x=New_Weather_Lucknow$tmin, main = "Lucknow Min Temparature")
+## Data outside <15 are outliers for Lucknow min 
+
+hist(x=New_Weather_Lucknow$tmax, main = "Lucknow Max  Temparature")
+## Data outside >35 are outliers for Lucknow min 
+
+hist(x=New_Weather_Lucknow$prcp, main = "Lucknow Precipitation", breaks = 5)
+## Extreme cases are above 50
+
+## So lets make special dataset
+Special_Weather_Lucknow <- New_Weather_Lucknow %>% filter((tavg < 16) | (tavg>33) | (tmin < 15) | (tmax > 30) | (prcp > 50))
+View(Special_Weather_Lucknow)
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Special_Weather_Lucknow, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Special_Weather_Lucknow$prcp/50) +
+  labs(title = "Impact of temperature on precipitation")
+
+## From the picture looks like the extreme precipitation happens either during when tmin is between 20 to 30
+## So, lets put a special filter around that and redraw
+Ext_Special_Weather_Lucknow <- Special_Weather_Lucknow %>% filter((tmin > 20) & (tmin < 30))
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Ext_Special_Weather_Lucknow, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Ext_Special_Weather_Lucknow$prcp/75) +
+  labs(title = "Impact of temperature on precipitation")
+```
+
+## Exploratory Analysis of Mumbai Weather Dataset
+```{r}
+View(New_Weather_Mumbai)
+hist(x=New_Weather_Mumbai$tavg, main = "Mumbai Average Temparature")
+## Data outside <25 and >30 are outliers for Mumbai average 
+
+hist(x=New_Weather_Mumbai$tmin, main = "Mumbai Min Temparature")
+## Data outside <17 are outliers for Mumbai min 
+
+hist(x=New_Weather_Mumbai$tmax, main = "Mumbai Max  Temparature")
+## Data outside >35 are outliers for Mumbai min 
+
+hist(x=New_Weather_Mumbai$prcp, main = "Mumbai Precipitation", breaks = 5)
+## Extreme cases are above 50
+
+## So lets make special dataset
+Special_Weather_Mumbai <- New_Weather_Mumbai %>% filter((tavg < 25) | (tavg>30) | (tmin < 17) | (tmax > 35) | (prcp > 50))
+View(Special_Weather_Mumbai)
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Special_Weather_Mumbai, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Special_Weather_Mumbai$prcp/50) +
+  labs(title = "Impact of temperature on precipitation")
+
+## From the picture looks like the extreme precipitation happens either during when tmin is between 22 to 27
+## So, lets put a special filter around that and redraw
+Ext_Special_Weather_Mumbai <- Special_Weather_Mumbai %>% filter((tmin > 22) & (tmin < 27))
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Ext_Special_Weather_Mumbai, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Ext_Special_Weather_Mumbai$prcp/75) +
+  labs(title = "Impact of temperature on precipitation")
+```
+
+## Exploratory Analysis of Jodhpur Weather Dataset
+```{r}
+View(New_Weather_Jodhpur)
+hist(x=New_Weather_Jodhpur$tavg, main = "Jodhpur Average Temparature")
+## Data outside <22 and >28 are outliers for Jodhpur average 
+
+hist(x=New_Weather_Jodhpur$tmin, main = "Jodhpur Min Temparature")
+## Data outside <16 are outliers for Jodhpur min 
+
+hist(x=New_Weather_Jodhpur$tmax, main = "Jodhpur Max  Temparature")
+## Data outside >33 are outliers for Jodhpur min 
+
+hist(x=New_Weather_Jodhpur$prcp, main = "Jodhpur Precipitation", breaks = 5)
+## Extreme cases are above 50
+
+## So lets make special dataset
+Special_Weather_Jodhpur <- New_Weather_Jodhpur %>% filter((tavg < 22) | (tavg>28) | (tmin < 16) | (tmax > 33) | (prcp > 50))
+View(Special_Weather_Jodhpur)
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Special_Weather_Jodhpur, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Special_Weather_Jodhpur$prcp/50) +
+  labs(title = "Impact of temperature on precipitation")
+
+## From the picture looks like the extreme precipitation happens either during when tmin is between 17 to 23
+## So, lets put a special filter around that and redraw
+Ext_Special_Weather_Jodhpur <- Special_Weather_Jodhpur %>% filter((tmin > 17) & (tmin < 23))
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Ext_Special_Weather_Jodhpur, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Ext_Special_Weather_Jodhpur$prcp/75) +
+  labs(title = "Impact of temperature on precipitation")
+```
+
+## Exploratory Analysis of Bhubhenshwar Weather Dataset
+```{r}
+View(New_Weather_Bhubhneshwar)
+hist(x=New_Weather_Bhubhneshwar$tavg, main = "Bhubhenshwar Average Temparature")
+## Data outside <24 and >32 are outliers for Bhubhenshwar average 
+
+hist(x=New_Weather_Bhubhneshwar$tmin, main = "Bhubhenshwar Min Temparature")
+## Data outside <15 are outliers for Bhubhenshwar min 
+
+hist(x=New_Weather_Bhubhneshwar$tmax, main = "Bhubhenshwar Max  Temparature")
+## Data outside >35 are outliers for Bhubhenshwar min 
+
+hist(x=New_Weather_Bhubhneshwar$prcp, main = "Bhubhenshwar Precipitation", breaks = 5)
+## Extreme cases are above 50
+
+## So lets make special dataset
+Special_Weather_Bhubhenshwar <- New_Weather_Bhubhneshwar %>% filter((tavg < 24) | (tavg>32) | (tmin < 15) | (tmax > 35) | (prcp > 50))
+View(Special_Weather_Bhubhenshwar)
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Special_Weather_Bhubhenshwar, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Special_Weather_Bhubhenshwar$prcp/50) +
+  labs(title = "Impact of temperature on precipitation")
+
+## From the picture looks like the extreme precipitation happens either during when tmin is between 17 to 27
+## So, lets put a special filter around that and redraw
+Ext_Special_Weather_Bhubhenshwar <- Special_Weather_Bhubhenshwar %>% filter((tmin > 17) & (tmin < 27))
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Ext_Special_Weather_Bhubhenshwar, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Ext_Special_Weather_Bhubhenshwar$prcp/75) +
+  labs(title = "Impact of temperature on precipitation")
+```
+
+## Exploratory Analysis of Rourkela Weather Dataset
+```{r}
+View(New_Weather_Rourkela)
+hist(x=New_Weather_Rourkela$tavg, main = "Rourkela Average Temparature")
+## Data outside <20 and >32 are outliers for Rourkela average 
+
+hist(x=New_Weather_Rourkela$tmin, main = "Rourkela Min Temparature")
+## Data outside <15 are outliers for Rourkela min 
+
+hist(x=New_Weather_Rourkela$tmax, main = "Rourkela Max  Temparature")
+## Data outside >35 are outliers for Rourkela min 
+
+hist(x=New_Weather_Rourkela$prcp, main = "Rourkela Precipitation", breaks = 5)
+## Extreme cases are above 40
+
+## So lets make special dataset
+Special_Weather_Rourkela <- New_Weather_Rourkela %>% filter((tavg < 20) | (tavg>32) | (tmin < 15) | (tmax > 30) | (prcp > 40))
+View(Special_Weather_Rourkela)
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Special_Weather_Rourkela, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Special_Weather_Rourkela$prcp/50) +
+  labs(title = "Impact of temperature on precipitation")
+
+## From the picture looks like the extreme precipitation happens either during when tmin is between 22 to 27
+## So, lets put a special filter around that and redraw
+Ext_Special_Weather_Rourkela <- Special_Weather_Rourkela %>% filter((tmin > 22) & (tmin < 27))
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Ext_Special_Weather_Rourkela, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Ext_Special_Weather_Rourkela$prcp/75) +
+  labs(title = "Impact of temperature on precipitation")
+
+```
+
+
+
+## Exploratory Analysis of AQI data station wise
+```{r}
+# Lets see the performance of the AQI over years
+AQ_station_Day_Sep <- New_AQ_station_hour %>% separate(Datetime, c('Date', 'Time'), sep =" ") %>% separate(Time, c('Hr', 'Min', 'Sec'), sep=":") %>% mutate(Hour = as.numeric(Hr))
+
+AQ_station_Day_Sep
+
+AQ_station_Day_Duration <- AQ_station_Day_Sep %>% mutate(Duration=cut(Hour, breaks=c(-1, 6, 18, 24),labels=c("Early_Morning","Day","Night")))
+AQ_station_Day_Duration
+##
+AQI_Over_Years <- AQ_station_Day_Duration%>% group_by(YEAR = year(ymd(Date)), AQI_Bucket) %>% summarize(Mean_AQI = mean(AQI))
+AQI_Over_Years
+ggplot(AQI_Over_Years, aes(x = YEAR, y = Mean_AQI, color=AQI_Bucket))+  geom_line()
+
+## It appears that 'Severe' and 'Poor' cases didnt exist too predominantly until 2017 from which these
+## two gained at the behest of 'Good' AQI cases
+
+
+# Lets see the performance of the AQI over a day in every year
+
+AQI_Over_Time <- AQ_station_Day_Duration %>% group_by(YEAR = year(ymd(Date)), Duration) %>% summarize(Mean_AQI = mean(AQI))
+ggplot(AQI_Over_Time, aes(x = YEAR, y = Mean_AQI, color = Duration))+  geom_point(size = AQI_Over_Time$Duration)
+
+## We can see that 2017 had the worst air quality index but worst was during day time
+## Things slowed down in the years later but in them, night time pollution was high.
+## In all cases, early morning pollution was the lowest.
+
+
+# Lets see the performance of the AQI monthwise
+AQI_monthwise <- AQ_station_Day_Duration %>% group_by(Month = month(ymd(Date), label = TRUE), Duration) %>% summarize(Mean_AQI = mean(AQI))
+ggplot(AQI_monthwise, aes(x = Month, y = Mean_AQI, color = Duration))+  geom_point(size = AQI_monthwise$Duration)
+
+## We can see that the colder months - i.e., from Oct to Feb, the AQI is the worst, its bad during summer but it appears the best in monsoon season.
+
+AQI_Over_month <- AQ_station_Day_Duration %>% group_by(YEAR = year(ymd(Date)), Month = month(ymd(Date), label = TRUE), Duration) %>% summarize(Mean_AQI = mean(AQI))
+
+# Lets see if how this works out yearwise and monthwise
+ggplot(AQI_Over_month, aes(x = Month, y = Mean_AQI, color = Duration))+  geom_point(size = AQI_Over_month$Duration) + facet_wrap(~YEAR)
+
+## We can see the same trend every year - i.e., the colder months has the worst AQI while the monsoon has the best AQI while summer/spring time having the intermediate values
+
+## Now lets report this city wise - probably for the Month wise combination
+AQI_Stationwise <- AQ_station_Day_Duration %>% group_by(Station = StationId, YEAR = year(ymd(Date)), Month = month(ymd(Date), label = TRUE), Duration) %>% summarize(Mean_AQI = mean(AQI))
+ggplot(AQI_Stationwise, aes(x = Month, y = Mean_AQI, color = Station))+  geom_point(shape = AQI_Stationwise$Duration)
+
+## Across stations, the trend seems to be the same - i.e., worst during winter, intermediate during spring/summer, best during monsoon.
+
+## Now out of the 19 stations, we are very interested on just interested on Delhi for which we are going to do air traffic impact analysis - so lets filter them and zoom into their performance alone
+AQI_Delhi_Station <- AQ_station_Day_Duration %>% filter( (StationId == "DL001") | (StationId == "DL019")) %>% group_by(Station = StationId, YEAR = year(ymd(Date)), Month = month(ymd(Date), label = TRUE), Duration) %>% summarize(Mean_AQI = mean(AQI))
+ggplot(AQI_Delhi_Station, aes(x = Month, y = Mean_AQI, color = Duration))+  geom_point(size = AQI_Delhi_Station$Duration) + facet_wrap(~YEAR)
+
+# Lets see how AQ day data is different from station hour wise data
+New_AQ_station_day
+
+New_AQ_station_day_Years <- New_AQ_station_day%>% group_by(YEAR = year(ymd(Date)), AQI_Bucket) %>% summarize(Mean_AQI = mean(AQI))
+New_AQ_station_day_Years
+
+## There seems to be nothing new that we can derive out of the station day wise that we can't derive out of 
+## station hour wise data. so no further analysis needed over here
+
+
+```
+
+## Exploratory Analysis of AQI data city wise
+```{r}
+## Lets look at City wise hourly AQI data
+New_AQ_city_hour
+
+# Lets see the performance of the AQI over years
+AQ_city_Day_Sep <- New_AQ_city_hour %>% separate(Datetime, c('Date', 'Time'), sep =" ") %>% separate(Time, c('Hr', 'Min', 'Sec'), sep=":") %>% mutate(Hour = as.numeric(Hr))
+
+AQ_city_Day_Duration <- AQ_city_Day_Sep %>% mutate(Duration=cut(Hour, breaks=c(-1, 6, 18, 24),labels=c("Early_Morning","Day","Night")))
+##
+AQI_City_Over_Years <- AQ_city_Day_Duration%>% group_by(YEAR = year(ymd(Date)), AQI_Bucket) %>% summarize(Mean_AQI = mean(AQI))
+AQI_City_Over_Years
+ggplot(AQI_City_Over_Years, aes(x = YEAR, y = Mean_AQI, color=AQI_Bucket))+  geom_line()
+
+## We can see that the colder months - i.e., from Oct to Feb, the AQI is the worst, its bad during summer but it appears the best in monsoon season.
+
+# Lets see the performance of the AQI over a day in every year
+
+AQI_City_Over_Time <- AQ_city_Day_Duration %>% group_by(YEAR = year(ymd(Date)), Duration) %>% summarize(Mean_AQI = mean(AQI))
+ggplot(AQI_City_Over_Time, aes(x = YEAR, y = Mean_AQI, color = Duration))+  geom_point(size = AQI_City_Over_Time$Duration)
+
+## It appears 2015 had peak values of AQIs, which dropped to very low in 2016, gained to half the levels back in 2017 and then gradually reducing
+## We can see that 2015-2017 worst was during day time but from 2018, there were worse night times - may be something to do with dropped levels of AQIs as well
+## In all cases, early morning pollution seems to be the lowest.
+
+
+# Lets see the performance of the AQI monthwise
+AQI_City_monthwise <- AQ_city_Day_Duration %>% group_by(Month = month(ymd(Date), label = TRUE), Duration) %>% summarize(Mean_AQI = mean(AQI))
+AQI_City_monthwise
+ggplot(AQI_City_monthwise, aes(x = Month, y = Mean_AQI, color = Duration))+  geom_point(size = AQI_City_monthwise$Duration)
+## We can see that the winter months - i.e., from Oct to Feb, the AQI is the worst, its bad during summer but it appears the best in monsoon season. The difference between stationwise data is that, here Nov seems to be the worst month while in ther other dataset, Dec held the worst...
+
+AQI_City_Over_month <- AQ_city_Day_Duration %>% group_by(YEAR = year(ymd(Date)), Month = month(ymd(Date), label = TRUE), Duration) %>% summarize(Mean_AQI = mean(AQI))
+AQI_City_Over_month
+
+# Lets see if how this works out yearwise and monthwise
+ggplot(AQI_City_Over_month, aes(x = Month, y = Mean_AQI, color = Duration))+  geom_point(size = AQI_City_Over_month$Duration) + facet_wrap(~YEAR)
+
+## We can see the same trend every year - i.e., the winter months has the worst AQI while the monsoon has the best AQI while summer/spring time having the intermediate values
+
+## Now lets report this city wise - probably for the Month wise combination
+AQI_Citywise <- AQ_city_Day_Sep %>% group_by(City, YEAR = year(ymd(Date)), Month = month(ymd(Date), label = TRUE)) %>% summarize(Mean_AQI = mean(AQI))
+ggplot(AQI_Citywise, aes(x = Month, y = Mean_AQI))+  geom_point(aes(color=City))
+AQI_Citywise
+## Across stations, the trend seems to be the same - i.e., worst during winter, intermediate during spring/summer, best during monsoon.
+
+## Now out of all the cities, we are very interested on Delhi for which we are going to do air traffic impact analysis - so lets filter them and zoom into their performance alone
+AQI_Delhi_City <- AQ_city_Day_Sep %>% filter( City == "Delhi") %>% group_by(City, YEAR = year(ymd(Date)), Month = month(ymd(Date), label = TRUE)) %>% summarize(Mean_AQI = mean(AQI))
+ggplot(AQI_Delhi_City, aes(x = Month, y = Mean_AQI))+  geom_point() + facet_wrap(~YEAR)
+
+
+New_AQ_city_day
+
+New_AQ_city_day_Years <- New_AQ_city_day%>% group_by(City, YEAR = year(ymd(Date)), Month = month(ymd(Date), label = TRUE)) %>% summarize(Mean_AQI = mean(AQI))
+New_AQ_city_day_Years
+ggplot(New_AQ_city_day_Years, aes(x = Month, y = Mean_AQI))+  geom_point(aes(color=City))
+
+## There seems to be small difference when comparing hour wise data to day wise data, but not significant enough. So we will live with the hour wise data itself for cities.
+
+
+```
+## Analyse the parameters impacting the AQI index
+```{r}
+## We would like to understand which are the parameters are really affecting AQI value.
+## Based on the analysis above we will stick to using the Cleaned Station hour wise datasets.
+
+New_AQ_station_hour_sep <- New_AQ_station_hour %>% separate(Datetime, c('Date', 'Time'), sep =" ") %>% separate(Time, c('Hr', 'Min', 'Sec'), sep=":") %>% mutate(Hour = as.numeric(Hr), Month = month(ymd(Date)))
+
+New_AQ_station_hour_sep
+
+## Now lets focus on the months where we have the most troubles with AQI - Oct to Feb
+New_AQ_station_hour_sep_BM <- New_AQ_station_hour_sep %>% filter ((Month == 1) | (Month == 2) | (Month == 10) | (Month == 11) | (Month == 12))
+
+New_AQ_station_hour_sep_BM
+
+AQI_O3_model <- lm(AQI~O3, data = New_AQ_station_hour_sep)
+fmodel(AQI_O3_model)
+## OK vow, looks like AQI has direct relationship with the O3 content
+
+AQI_O3_model_BM <- lm(AQI~O3, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_O3_model_BM)
+
+## In bad months looks like O3 and AQI are inversely proportional
+
+
+## Lets try with PM2.5
+AQI_PM_2_5_model <- lm(AQI~PM2.5, data = New_AQ_station_hour_sep)
+fmodel(AQI_PM_2_5_model)
+## OK even here there is an impact - actually much more
+AQI_PM_2_5_model_BM <- lm(AQI~PM2.5, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_PM_2_5_model_BM)
+## PM2.5 impact seems to be much higher over the winter months
+
+##Lets try others
+AQI_PM_10_model <- lm(AQI~PM10, data = New_AQ_station_hour_sep)
+fmodel(AQI_PM_10_model)
+AQI_PM_10_model_BM <- lm(AQI~PM10, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_PM_10_model_BM)
+
+## No significant impact change in winter months for PM10
+
+AQI_NO_model <- lm(AQI~NO, data = New_AQ_station_hour_sep)
+fmodel(AQI_NO_model)
+AQI_NO_model_BM <- lm(AQI~NO, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_NO_model_BM)
+## Slight reduction in winter months for NO
+
+AQI_NO2_model <- lm(AQI~NO2, data = New_AQ_station_hour_sep)
+fmodel(AQI_NO2_model)
+AQI_NO2_model_BM <- lm(AQI~NO2, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_NO2_model_BM)
+## No significant impact change in winter months for NO2
+
+AQI_NOx_model <- lm(AQI~NOx, data = New_AQ_station_hour_sep)
+fmodel(AQI_NOx_model)
+AQI_NOx_model_BM <- lm(AQI~NOx, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_NOx_model_BM)
+## Slight reduction in winter months for NOx
+
+AQI_NH3_model <- lm(AQI~NH3, data = New_AQ_station_hour_sep)
+fmodel(AQI_NH3_model)
+AQI_NH3_model_BM <- lm(AQI~NH3, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_NH3_model_BM)
+## PM2.5 impact seems to be much higher (50% more) over the winter months
+
+AQI_CO_model <- lm(AQI~CO, data = New_AQ_station_hour_sep)
+fmodel(AQI_CO_model)
+AQI_CO_model_BM <- lm(AQI~CO, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_CO_model_BM)
+## No significant impact change in winter months for CO
+
+AQI_SO2_model <- lm(AQI~SO2, data = New_AQ_station_hour_sep)
+fmodel(AQI_SO2_model)
+AQI_SO2_model_BM <- lm(AQI~SO2, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_SO2_model_BM)
+## Slight reduction in winter months for SO2
+
+AQI_Benzene_model <- lm(AQI~Benzene, data = New_AQ_station_hour_sep)
+fmodel(AQI_Benzene_model)
+AQI_Benzene_model <- lm(AQI~Benzene, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_Benzene_model)
+## Slight reduction in winter months for Benzene
+
+AQI_Toluene_model <- lm(AQI~Toluene, data = New_AQ_station_hour_sep)
+fmodel(AQI_Toluene_model)
+AQI_Toluene_model_BM <- lm(AQI~Toluene, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_Toluene_model_BM)
+## Slight reduction in winter months for Toulene
+
+AQI_Xylene_model <- lm(AQI~Xylene, data = New_AQ_station_hour_sep)
+fmodel(AQI_Xylene_model)
+AQI_Xylene_model_BM <- lm(AQI~Xylene, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_Xylene_model_BM)
+## No significant impact change in winter months for Xylene
+
+## Among these, the highest impact seems to be from PM25.5, CO. Bringing in
+## O3 due to their peculiar reversal in Winter months
+AQI_High_Impact_model <- lm(AQI~PM2.5+O3+CO, data = New_AQ_station_hour_sep)
+fmodel(AQI_High_Impact_model)
+
+AQI_High_Impact_model_BM <- lm(AQI~PM2.5+O3+CO, data = New_AQ_station_hour_sep_BM)
+fmodel(AQI_High_Impact_model_BM)
+```
+
+## Form a cohesive Delhi dataset
+```{r}
+## We have seen how components of air impacted AQI
+## Time to see the impact of weather on AQI by merging the station day wise data with the weather data
+## Please note we are not picking up station hour wise data because the weather data we have is only day wise data
+
+## Out of the cities for which weather has been provided, the only city that overlaps with the AQI data is Delhi
+## And ofcourse we are trying to find the impact of AQI on Airtraffic in Delhi, so lets bring in that too
+## So lets merge these three datasets only for Delhi
+
+Delhi_AQI_data_temp <- New_AQ_station_day %>% filter ((StationId == "DL001") | (StationId == "DL019"))%>% mutate(Date_1 = ymd(as.Date(Date)))
+Delhi_AQI_data <- Delhi_AQI_data_temp[, -2] %>% rename("Date" = "Date_1")
+
+New_Weather_Delhi_day <- New_Weather_Delhi %>% mutate(Date = dmy(time))
+
+Delhi_Airport_Delay_date <- New_Airport_delay %>% filter (Departure.Airport == "DEL") %>% mutate(Date_1 = dmy(Date))
+Delhi_Airport_Delay_rename <- Delhi_Airport_Delay_date[, -1] %>% rename("Date" = "Date_1")
+Delhi_Airport_Delay_date_sorted <- Delhi_Airport_Delay_rename[order(Delhi_Airport_Delay_rename$Date),]
+
+## The range of weather data is from 01/01/1990 to 25/07/2022
+## The range of airport delay data is from 28/01/18 to 27/1/2020
+
+## So the overlapping range is from 1/11/2018 to 26/1/2020
+
+Delhi_Airport_Delay_range <- Delhi_Airport_Delay_date_sorted %>% filter (between(Date, as.Date('2018-01-25'), as.Date('2020-01-27')))
+#Delhi_Airport_Delay <- Delhi_Airport_Delay_dates %>% filter ((Date >'25-01-18') & (Date < '29-01-20'))  #1925
+New_Weather_Delhi_day_range <- New_Weather_Delhi_day %>% filter (between(Date, as.Date('2018-01-25'), as.Date('2020-01-27')))
+
+Delhi_AQI_data_range <- Delhi_AQI_data %>% filter (between(Date, as.Date('2018-01-25'), as.Date('2020-01-27')))
+
+##Delhi_Airport_Delay data has multiple entries for a day as it is cutting across many airliners operating on an airport. But we are interested in average delay per day and not really on the airliner related information. So, lets clean the data a bit there.
+
+convert_min <- function(x)
+{
+  if(x < 0)
+  {
+    time_mins = 0
+  }
+  else
+  {
+    time_d <- hms(x)
+    time_mins <- hour(time_d)*60 + minute(time_d)
+  }
+}
+
+Delhi_Airport_Delay_in_min <- Delhi_Airport_Delay_range %>% mutate (Departure_Delay_min = unlist(lapply(Departure.Delay, convert_min)), Arrival_Delay_min = unlist(lapply(Arrival.Time.Delay, convert_min)))
+Delhi_Airport_Delay_datewise <- Delhi_Airport_Delay_in_min  %>% group_by(Date) %>% summarize(Daily_Delay = sum(Departure_Delay_min + Arrival_Delay_min))
+
+Delhi_Airport_Delay_datewise
+
+Delhi_AQI_weather_data_merge_temp <- merge(New_Weather_Delhi_day, Delhi_AQI_data)
+Delhi_AQI_weather_data_merge_temp_1 <- Delhi_AQI_weather_data_merge_temp[,-2]
+Delhi_cohesive_dataset <- merge(Delhi_AQI_weather_data_merge_temp_1, Delhi_Airport_Delay_datewise)
+Delhi_AQI_weather_data_merge_temp_1
+Delhi_cohesive_dataset
+#Looks like the merger is successful with no NA
+#Lets summarize full dataset
+summary(Delhi_cohesive_dataset)
+View(Delhi_cohesive_dataset)
+```
+
+## Analyse cohesive dataset a bit to understand how delay and other parameters plot each other
+
+```{r}
+View(Delhi_cohesive_dataset)
+names(Delhi_cohesive_dataset)
+ggplot(Delhi_cohesive_dataset, aes(x = AQI, y = Daily_Delay, color = AQI_Bucket, size = prcp)) +
+  geom_point() +
+  labs(title = "Impact of AQI and prcp")
+
+##As per the plot, Good AQI too gets observed for some delay cases but they are far and few... and does not seems to have caused high amount of delays 
+## There area huge amount of delays caused for satisfactory AQI cases but most of the delays could be associated 
+## with pretty high precipitation
+## There are good amount of delays associate with moderate cases too and they do have caused significant delays when combined with high precipitations
+## Delay instances reduces for Poor AQI cases but there is a slight increase in the values of delays
+## For very poor cases, impact gets high when combined with precipitation
+## Severe cases are high impact ones but looks like not affected with precipitation
+
+
+## Now lets view this purely from the weather perspective
+View(Delhi_cohesive_dataset)
+names(Delhi_cohesive_dataset)
+ggplot(Delhi_cohesive_dataset, aes(x = tavg, y = Daily_Delay, color = tmin, size = prcp)) +
+  geom_point() +
+  labs(title = "Impact of temp and prcp")
+
+## Its clear that bigger precipitation brings in more instances of delays
+## But its also interesting to find that higher tavg, higher precipitation and higher tmin bring 
+# in a lot of delays - though size of precipitation does not always result in costly delays
+
+## Ok Lets also analyse if the components O3, PM2.5 and CO has impacts on delays
+
+ggplot(Delhi_cohesive_dataset, aes(x = O3, y = Daily_Delay, size = O3)) +
+  geom_point() +
+  labs(title = "Impact of O3")
+
+## Looks like more O3 directly relates to higher delays
+
+ggplot(Delhi_cohesive_dataset, aes(x = PM2.5, y = Daily_Delay, size = PM2.5)) +
+  geom_point() +
+  labs(title = "Impact of PM2.5")
+
+## Looks like more PM2.5 might not have too much impact...
+
+ggplot(Delhi_cohesive_dataset, aes(x = CO, y = Daily_Delay, size = CO)) +
+  geom_point() +
+  labs(title = "Impact of CO")
+
+## Looks like size of CO has some correlation but may not be linear...
+
+ggplot(Delhi_cohesive_dataset, aes(x = PM10, y = Daily_Delay, size = PM10)) +
+  geom_point() +
+  labs(title = "Impact of PM10")
+
+## Looks like more PM2.5 might not have too much impact...
+
+ggplot(Delhi_cohesive_dataset, aes(x = prcp, y = Daily_Delay, size = prcp)) +
+  geom_point() +
+  labs(title = "Impact of rain")
+
+## Looks like amount of rain has direct impact on delays...
+
+
+ggplot(Delhi_cohesive_dataset, aes(x = tavg, y = Daily_Delay, size = tavg)) +
+  geom_point() +
+  labs(title = "Impact of Average Temp")
+
+## Looks like a lot of low intensity delays on higher average temprature...
+
+ggplot(Delhi_cohesive_dataset, aes(x = tmin, y = Daily_Delay, size = tmin)) +
+  geom_point() +
+  labs(title = "Impact of Tmin")
+## Looks like a lot of low intensity delays on higher average temprature...
+
+ggplot(Delhi_cohesive_dataset, aes(x = AQI, y = Daily_Delay, size = AQI, color=AQI_Bucket)) +
+  geom_point() +
+  labs(title = "Impact of AQI")
+
+## Looks like a lot of low intensity delays on higher Tmin...
+
+## Ok based on this, lets pick these elements to find the right model on impacts the delays of Delhi airtraffic:
+## Precipitation, AQI, tmin, O3 and CO
+
+## Lets see how the elements individually have linear regression relationship with the traffic delay
+
+Delhi_Traffic_Delay_Model_AQI = lm(Daily_Delay ~ AQI, data = Delhi_cohesive_dataset)
+fmodel(Delhi_Traffic_Delay_Model_AQI)
+
+Delhi_Traffic_Delay_Model_tavg = lm(Daily_Delay ~ tavg, data = Delhi_cohesive_dataset)
+fmodel(Delhi_Traffic_Delay_Model_tavg)
+
+Delhi_Traffic_Delay_Model_prcp = lm(Daily_Delay ~ prcp, data = Delhi_cohesive_dataset)
+fmodel(Delhi_Traffic_Delay_Model_prcp)
+
+Delhi_Traffic_Delay_Model_O3 = lm(Daily_Delay ~ O3, data = Delhi_cohesive_dataset)
+fmodel(Delhi_Traffic_Delay_Model_O3)
+
+Delhi_Traffic_Delay_Model_CO = lm(Daily_Delay ~ CO, data = Delhi_cohesive_dataset)
+fmodel(Delhi_Traffic_Delay_Model_CO)
+```
+
+## Model for predicting Delhi air traffic delays
+
+```{r}
+
+
+Delhi_Traffic_Delay_Model = lm(Daily_Delay ~ prcp+CO+tavg, data = Delhi_cohesive_dataset)
+fmodel(Delhi_Traffic_Delay_Model)
+
+```
