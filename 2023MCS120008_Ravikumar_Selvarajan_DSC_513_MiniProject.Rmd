@@ -67,7 +67,7 @@ prop_miss(Weather_Station)
 ## No cleaning needed of its data
 
 ```
-##Analysing Bangalore_1990_2022_BangaloreCity.csv
+##Analysing  and Performing Imputations on Bangalore_1990_2022_BangaloreCity.csv
 ```{r}
 ## Have a look at the data
 print ("The dimensions of the dataset")
@@ -146,14 +146,14 @@ ggplot(Weather_Bangalore_imp_track, aes(x = tavg, y = prcp, color = prcp_NA)) + 
 
 # Now lets fix the important the critically missing parameters prcp and lm 
 # via linear regression mechanism in relationship with other explanatory parameters
-Wthr_Blore_imp_lm_temp <- Weather_Bangalore %>% bind_shadow() %>% impute_lm(prcp ~ tavg + tmin) %>% impute_lm(tmin ~ tavg) %>% add_label_shadow()
+Weather_Bangalore_imp_lm_temp <- Weather_Bangalore %>% bind_shadow() %>% impute_lm(prcp ~ tavg + tmin) %>% impute_lm(tmin ~ tavg) %>% add_label_shadow()
 
-ggplot(Wthr_Blore_imp_lm_temp, aes(x = tavg, y = prcp, color = any_missing)) + geom_miss_point()
+ggplot(Weather_Bangalore_imp_lm_temp, aes(x = tavg, y = prcp, color = any_missing)) + geom_miss_point()
 
 ```
 
 
-##Analysing Chennai_1990_2022_Madras.csv
+##Analysing and Performing Imputations on Chennai_1990_2022_Madras.csv
 ```{r}
 ## Have a look at the data
 
@@ -242,7 +242,7 @@ ggplot(Weather_Chennai_imp_lm_temp, aes(x = tavg, y = prcp, color = any_missing)
 
 ```
 
-##Analysing Delhi_NCR_1990_2022_Safdarjung.csv
+##Analysing and Performing Imputations on Delhi_NCR_1990_2022_Safdarjung.csv
 ```{r}
 ## Have a look at the data
 
@@ -331,7 +331,7 @@ ggplot(Weather_Delhi_imp_lm_temp, aes(x = tavg, y = prcp, color = any_missing)) 
 
 ```
 
-##Analysing Lucknow_1990_2022.csv
+##Analysing and Performing Imputations on Lucknow_1990_2022.csv
 ```{r}
 ## Have a look at the data
 
@@ -420,7 +420,7 @@ ggplot(Weather_Lucknow_imp_lm_temp, aes(x = tavg, y = prcp, color = any_missing)
 
 ```
 
-##Analysing Mumbai_1990_2022_Santacruz.csv
+##Analysing and Performing Imputations on Mumbai_1990_2022_Santacruz.csv
 ```{r}
 ## Have a look at the data
 
@@ -509,7 +509,7 @@ ggplot(Weather_Mumbai_imp_lm_temp, aes(x = tavg, y = prcp, color = any_missing))
 
 ```
 
-##Analysing Rajasthan_1990_2022_Jodhpur.csv
+##Analysing and Performing Imputations on Rajasthan_1990_2022_Jodhpur.csv
 ```{r}
 ## Have a look at the data
 
@@ -778,7 +778,7 @@ AQ_stations [AQ_stations == ""] <- NA
 ## Lets fill them with NA and then find it.
 AQ_stations[is.na(Status),]
 ```
-##Analysing AQI Station Hour wise - station_hour.csv
+##Analysing and Performing Imputations on AQI Station Hour wise - station_hour.csv
 ```{r}
 ## Have a look at the data
 
@@ -839,7 +839,7 @@ bind_shadow(AQ_station_hour) %>%
 ggplot(aes(x = CO,
 color = AQI_NA)) +
 geom_density() +
-facet_wrap(~NO3_NA)
+facet_wrap(~O3_NA)
 
 # Explore the missingness in precipitation and air temperature, and display the missingness using `geom_miss_point'
 ggplot(AQ_station_hour, aes(x = CO,y = AQI)) + geom_miss_point()
@@ -867,7 +867,7 @@ ggplot(AQ_station_hour_imp_lm_temp, aes(x = CO, y = AQI, color = any_missing)) +
 
 ```
 
-##Analysing AQ_station_day  - station_day.csv
+##Analysing and Performing Imputations on AQ_station_day  - station_day.csv
 ```{r}
 ## Have a look at the data
 
@@ -898,8 +898,66 @@ AQ_station_day %>% group_by(AQI_Bucket)%>%count()
 ## Looks like Moderate entries are the highest ones, followed by Satisfactory 
 ## but third highest is NA entries...
 
+AQ_station_day %>% group_by(AQI_Bucket)%>%count()
+## Looks like Moderate entries are the highest ones but second highest is NA entries...
+## Lets analyse the missing data of the dataset
+n_miss(AQ_station_day) ## Total number of missing parameters
+miss_var_summary(AQ_station_day) ## Missingness summary
+miss_var_span(AQ_station_day, var = AQI, span_every = 250) ## Missingness spread
+miss_var_table(AQ_station_day)
+## vis_miss(AQ_station_day) Unable to visualise % of missing due to large data size
+gg_miss_upset(AQ_station_day) ## plot for missing data
+gg_miss_fct(x = AQ_station_day, fct = AQI) ## Heat map of missingness
+gg_miss_span(AQ_station_day, var = AQI, span_every = 250) ## Visualize span of prcp missingness
+
+## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+miss_scan_count(data = AQ_station_day, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
+
+##Create shadow matrix data
+head(as_shadow(AQ_station_day))
+
+#Create nabular data by binding the shadow to the data
+head(bind_shadow(AQ_station_day, only_miss = TRUE))
+
+# Lets explore the relations ship with the missing values
+AQ_station_day %>%
+bind_shadow(only_miss = TRUE) %>%
+group_by(AQI_NA) %>%
+summarise(tCO_mean = mean(CO),CO_sd = sd(CO))
+
+# After adding NA, there the SD and mean has also become NA
+
+bind_shadow(AQ_station_day) %>%
+ggplot(aes(x = CO,
+color = AQI_NA)) +
+geom_density() +
+facet_wrap(~O3_NA)
+
+# Explore the missingness in precipitation and air temperature, and display the missingness using `geom_miss_point'
+ggplot(AQ_station_day, aes(x = CO,y = AQI)) + geom_miss_point()
+
+# Looks like there are not too much of missing data
+
+# We would like to impute all the missing data with value below the range by 10%
+AQ_station_day_imp <- impute_below_all(AQ_station_day)
+ggplot(AQ_station_day_imp, aes(x = CO, y = AQI)) + geom_miss_point()
+
+# But we need to track the imputed values as well
+AQ_station_day_imp_track <- bind_shadow(AQ_station_day) %>% impute_below_all()
+ggplot(AQ_station_day_imp_track, aes(x = AQI, fill = AQI_NA)) + geom_histogram()
+ggplot(AQ_station_day_imp_track, aes(x = O3, fill = O3_NA)) + geom_histogram()
+
+ggplot(AQ_station_day_imp_track, aes(x = CO, y = AQI, color = AQI_NA)) + geom_point()
+
+## So we can successfully imputed all the NA values here
+
+# Now lets fix the important the critically missing parameters prcp and lm 
+# via linear regression mechanism in relationship with other explanatory parameters
+AQ_station_day_imp_lm_temp <- AQ_station_day %>% bind_shadow() %>% impute_lm(AQI ~ CO + O3) %>% impute_lm(O3 ~ CO) %>% add_label_shadow()
+
+ggplot(AQ_station_day_imp_lm_temp, aes(x = CO, y = AQI, color = any_missing)) + geom_miss_point()
 ```
-##Analysing AQ_city_day <- read.csv("./datasets/city_day.csv")
+##Analysing and Performing Imputations on AQ_city_day <- read.csv("./datasets/city_day.csv")
 ```{r}
 ## Have a look at the data
 
@@ -930,6 +988,66 @@ AQ_city_day [AQ_city_day == ""] <- NA
 AQ_city_day %>% group_by(AQI_Bucket)%>%count()
 ## Looks like Moderate entries are the highest ones, followed by Satisfactory 
 ## but third highest is NA entries...
+
+AQ_city_day %>% group_by(AQI_Bucket)%>%count()
+## Looks like Moderate entries are the highest ones but second highest is NA entries...
+## Lets analyse the missing data of the dataset
+n_miss(AQ_city_day) ## Total number of missing parameters
+miss_var_summary(AQ_city_day) ## Missingness summary
+miss_var_span(AQ_city_day, var = AQI, span_every = 250) ## Missingness spread
+miss_var_table(AQ_city_day)
+## vis_miss(AQ_city_day) Unable to visualise % of missing due to large data size
+gg_miss_upset(AQ_city_day) ## plot for missing data
+gg_miss_fct(x = AQ_city_day, fct = AQI) ## Heat map of missingness
+gg_miss_span(AQ_city_day, var = AQI, span_every = 250) ## Visualize span of prcp missingness
+
+## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+miss_scan_count(data = AQ_city_day, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
+
+##Create shadow matrix data
+head(as_shadow(AQ_city_day))
+
+#Create nabular data by binding the shadow to the data
+head(bind_shadow(AQ_city_day, only_miss = TRUE))
+
+# Lets explore the relations ship with the missing values
+AQ_city_day %>%
+bind_shadow(only_miss = TRUE) %>%
+group_by(AQI_NA) %>%
+summarise(tCO_mean = mean(CO),CO_sd = sd(CO))
+
+# After adding NA, there the SD and mean has also become NA
+
+bind_shadow(AQ_city_day) %>%
+ggplot(aes(x = CO,
+color = AQI_NA)) +
+geom_density() +
+facet_wrap(~O3_NA)
+
+# Explore the missingness in precipitation and air temperature, and display the missingness using `geom_miss_point'
+ggplot(AQ_city_day, aes(x = CO,y = AQI)) + geom_miss_point()
+
+# Looks like there are not too much of missing data
+
+# We would like to impute all the missing data with value below the range by 10%
+AQ_city_day_imp <- impute_below_all(AQ_city_day)
+ggplot(AQ_city_day_imp, aes(x = CO, y = AQI)) + geom_miss_point()
+
+# But we need to track the imputed values as well
+AQ_city_day_imp_track <- bind_shadow(AQ_city_day) %>% impute_below_all()
+ggplot(AQ_city_day_imp_track, aes(x = AQI, fill = AQI_NA)) + geom_histogram()
+ggplot(AQ_city_day_imp_track, aes(x = O3, fill = O3_NA)) + geom_histogram()
+
+ggplot(AQ_city_day_imp_track, aes(x = CO, y = AQI, color = AQI_NA)) + geom_point()
+
+## So we can successfully imputed all the NA values here
+
+# Now lets fix the important the critically missing parameters prcp and lm 
+# via linear regression mechanism in relationship with other explanatory parameters
+AQ_city_day_imp_lm_temp <- AQ_city_day %>% bind_shadow() %>% impute_lm(AQI ~ CO + O3) %>% impute_lm(O3 ~ CO) %>% add_label_shadow()
+
+ggplot(AQ_city_day_imp_lm_temp, aes(x = CO, y = AQI, color = any_missing)) + geom_miss_point()
+
 ```
 
 
@@ -962,6 +1080,63 @@ AQ_city_hour [AQ_city_hour == ""] <- NA
 AQ_city_hour %>% group_by(AQI_Bucket)%>%count()
 ## Looks like Moderate entries are the highest ones, followed by Satisfactory 
 ## but third highest is NA entries...
+
+n_miss(AQ_city_hour) ## Total number of missing parameters
+miss_var_summary(AQ_city_hour) ## Missingness summary
+miss_var_span(AQ_city_hour, var = AQI, span_every = 250) ## Missingness spread
+miss_var_table(AQ_city_hour)
+## vis_miss(AQ_city_hour) Unable to visualise % of missing due to large data size
+gg_miss_upset(AQ_city_hour) ## plot for missing data
+gg_miss_fct(x = AQ_city_hour, fct = AQI) ## Heat map of missingness
+gg_miss_span(AQ_city_hour, var = AQI, span_every = 250) ## Visualize span of prcp missingness
+
+## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+miss_scan_count(data = AQ_city_hour, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
+
+##Create shadow matrix data
+head(as_shadow(AQ_city_hour))
+
+#Create nabular data by binding the shadow to the data
+head(bind_shadow(AQ_city_hour, only_miss = TRUE))
+
+# Lets explore the relations ship with the missing values
+AQ_city_hour %>%
+bind_shadow(only_miss = TRUE) %>%
+group_by(AQI_NA) %>%
+summarise(tCO_mean = mean(CO),CO_sd = sd(CO))
+
+# After adding NA, there the SD and mean has also become NA
+
+bind_shadow(AQ_city_hour) %>%
+ggplot(aes(x = CO,
+color = AQI_NA)) +
+geom_density() +
+facet_wrap(~O3_NA)
+
+# Explore the missingness in precipitation and air temperature, and display the missingness using `geom_miss_point'
+ggplot(AQ_city_hour, aes(x = CO,y = AQI)) + geom_miss_point()
+
+# Looks like there are not too much of missing data
+
+# We would like to impute all the missing data with value below the range by 10%
+AQ_city_hour_imp <- impute_below_all(AQ_city_hour)
+ggplot(AQ_city_hour_imp, aes(x = CO, y = AQI)) + geom_miss_point()
+
+# But we need to track the imputed values as well
+AQ_city_hour_imp_track <- bind_shadow(AQ_city_hour) %>% impute_below_all()
+ggplot(AQ_city_hour_imp_track, aes(x = AQI, fill = AQI_NA)) + geom_histogram()
+ggplot(AQ_city_hour_imp_track, aes(x = O3, fill = O3_NA)) + geom_histogram()
+
+ggplot(AQ_city_hour_imp_track, aes(x = CO, y = AQI, color = AQI_NA)) + geom_point()
+
+## So we can successfully imputed all the NA values here
+
+# Now lets fix the important the critically missing parameters prcp and lm 
+# via linear regression mechanism in relationship with other explanatory parameters
+AQ_city_hour_imp_lm_temp <- AQ_city_hour %>% bind_shadow() %>% impute_lm(AQI ~ CO + O3) %>% impute_lm(O3 ~ CO) %>% add_label_shadow()
+
+ggplot(AQ_city_hour_imp_lm_temp, aes(x = CO, y = AQI, color = any_missing)) + geom_miss_point()
+
 ```
 
 ##Analysing Airport_delay: Aiport_Delay.csv
@@ -997,15 +1172,16 @@ Airport_delay %>% group_by(Arrival.Airport, Arrival.Airport.On.Time.Rating..out.
 
 
 
-## Cleaning Datasets
+## Further Cleaning Datasets over imputations done previously
 ```{r}
 
 ## Remove the entries from the table where tavg is NA
-New_Weather_Bangalore <- Weather_Bangalore[complete.cases(Weather_Bangalore),]
-New_Weather_Delhi <- Weather_Delhi[complete.cases(Weather_Delhi),]
-New_Weather_Lucknow <- Weather_Lucknow[complete.cases(Weather_Lucknow),]
-New_Weather_Mumbai <- Weather_Mumbai[complete.cases(Weather_Mumbai),]
-New_Weather_Jodhpur <- Weather_Jodhpur[complete.cases(Weather_Jodhpur),]
+New_Weather_Bangalore <- Weather_Bangalore_imp_lm_temp[complete.cases(Weather_Bangalore),]
+New_Weather_Chennai <- Weather_Chennai_imp_lm_temp[complete.cases(Weather_Chennai),]
+New_Weather_Delhi <- Weather_Delhi_imp_lm_temp[complete.cases(Weather_Delhi),]
+New_Weather_Lucknow <- Weather_Lucknow_imp_lm_temp[complete.cases(Weather_Lucknow),]
+New_Weather_Mumbai <- Weather_Mumbai_imp_lm_temp[complete.cases(Weather_Mumbai),]
+New_Weather_Jodhpur <- Weather_Jodhpur_imp_lm_temp[complete.cases(Weather_Jodhpur),]
 
 ## For Bhubhenshwar and Rourkela, we need to first remove the columns snow and tsun which has no valid entries
 ## We can also remove the wdir, wspd, pressure columns as the other stations are not having them
@@ -1020,10 +1196,10 @@ New_Weather_Rourkela <- Standard_Weather_Rourkela[complete.cases(Standard_Weathe
 ## When it comes to AQI stations, we need only active stations
 
 New_AQ_stations <- AQ_stations %>% filter(Status == "Active")
-New_AQ_station_hour <- AQ_station_hour[complete.cases(AQ_station_hour),]
-New_AQ_station_day <- AQ_station_day[complete.cases(AQ_station_day),]
-New_AQ_city_hour <- AQ_city_hour[complete.cases(AQ_city_hour),]
-New_AQ_city_day <- AQ_city_day[complete.cases(AQ_city_day),]
+New_AQ_station_hour <- AQ_station_hour_imp_lm_temp[complete.cases(AQ_station_hour),]
+New_AQ_station_day <- AQ_station_day_imp_lm_temp[complete.cases(AQ_station_day),]
+New_AQ_city_hour <- AQ_city_hour_imp_lm_temp[complete.cases(AQ_city_hour),]
+New_AQ_city_day <- AQ_city_day_imp_lm_temp[complete.cases(AQ_city_day),]
 
 ## Clean the Airport Delay data too
 New_Airport_delay <- Airport_delay[complete.cases(Airport_delay),]
@@ -1071,6 +1247,42 @@ ggplot(Ext_Special_Weather_Bangalore, aes(x = tmin,
 ```
 
 ## Exploratory Analysis of Chennai Weather Dataset
+```{r}
+hist(x=New_Weather_Chennai$tavg, main = "Chennai Average Temparature")
+## Data outside <15 and >35 are outliers for Chennai average 
+
+hist(x=New_Weather_Chennai$tmin, main = "Chennai Min Temparature")
+## Data outside <16 are outliers for Chennai min 
+
+hist(x=New_Weather_Chennai$tmax, main = "Chennai Max  Temparature")
+## Data outside >35 are outliers for Chennai min 
+
+hist(x=New_Weather_Chennai$prcp, main = "Chennai Precipitation", breaks = 5)
+## Extreme cases are above 50
+
+## So lets make special dataset
+Special_Weather_Chennai <- New_Weather_Chennai %>% filter((tavg < 15) | (tavg>35) | (tmin < 10) | (tmax > 30) | (prcp > 50))
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Special_Weather_Chennai, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Special_Weather_Chennai$prcp/50) +
+  labs(title = "Impact of temperature on precipitation")
+
+## From the picture looks like the extreme precipitation happens either during when tmin is between 20 to 30
+## So, lets put a special filter around that and redraw
+Ext_Special_Weather_Chennai <- Special_Weather_Chennai %>% filter((tmin > 20) & (tmin < 30))
+
+## And since the precipitation makes the most impact on flights, lets take a look at how precipitation gets impacted by temperatures
+ggplot(Ext_Special_Weather_Chennai, aes(x = tmin, 
+                     y = tmax, 
+                     color = prcp)) +
+  geom_point(size = Ext_Special_Weather_Chennai$prcp/75) +
+  labs(title = "Impact of temperature on precipitation")
+
+```
+
 ## Exploratory Analysis of Delhi Weather Dataset
 ```{r}
 hist(x=New_Weather_Delhi$tavg, main = "Delhi Average Temparature")
@@ -1557,10 +1769,9 @@ ggplot(Summary_AQI_Model_Performace, aes(x = Month)) +
 ## Out of the cities for which weather has been provided, the only city that overlaps with the AQI data is Delhi
 ## And ofcourse we are trying to find the impact of AQI on Airtraffic in Delhi, so lets bring in that too
 ## So lets merge these three datasets only for Delhi
-
 Delhi_AQI_data_temp <- New_AQ_station_day %>% filter ((StationId == "DL001") | (StationId == "DL019"))%>% mutate(Date_1 = ymd(as.Date(Date)))
 Delhi_AQI_data <- Delhi_AQI_data_temp[, -2] %>% rename("Date" = "Date_1")
-
+Delhi_AQI_data
 New_Weather_Delhi_day <- New_Weather_Delhi %>% mutate(Date = dmy(time))
 
 Delhi_Airport_Delay_date <- New_Airport_delay %>% filter (Departure.Airport == "DEL") %>% mutate(Date_1 = dmy(Date))
@@ -1597,9 +1808,9 @@ Delhi_Airport_Delay_in_min <- Delhi_Airport_Delay_range %>% mutate (Departure_De
 Delhi_Airport_Delay_datewise <- Delhi_Airport_Delay_in_min  %>% group_by(Date) %>% summarize(Daily_Delay = sum(Departure_Delay_min + Arrival_Delay_min))
 
 Delhi_AQI_weather_data_merge_temp <- merge(New_Weather_Delhi_day, Delhi_AQI_data)
-Delhi_AQI_weather_data_merge_temp_1 <- Delhi_AQI_weather_data_merge_temp[,-2]
+Delhi_AQI_weather_data_merge_temp_1 <- Delhi_AQI_weather_data_merge_temp[,-3]
 Delhi_cohesive_dataset <- merge(Delhi_AQI_weather_data_merge_temp_1, Delhi_Airport_Delay_datewise)%>% mutate(Month = month(ymd(Date)))
-
+Delhi_cohesive_dataset
 head(Delhi_cohesive_dataset)
 #Looks like the merger is successful with no NA
 #Lets summarize full dataset
@@ -1725,19 +1936,19 @@ evaluate_model(Delhi_Traffic_Delay_Model_O3, O3 = 50)
 evaluate_model(Delhi_Traffic_Delay_Model_CO, CO = 1)
 evaluate_model(Delhi_Traffic_Delay_Model_Month, Month = 12)
 
-diff_1 <- 75.90179 - 65.89103
+diff_1 <- 118.1039 - 104.8699
 diff_1
-diff_2 <- 74.13083 - 65.28536	
+diff_2 <- 114.0189 - 103.4728		
 diff_2
-diff_3 <- 221.3815 - 207.8647
+diff_3 <- 338.1836 - 319.6457	
 diff_3
-diff_4 <- 86.52229 - 75.87323
+diff_4 <- 148.3426 - 133.2912
 diff_4
-diff_5 <- 76.02051 - 66.60121
+diff_5 <- 116.9036 - 97.6898	
 diff_5
-diff_6 <- 100.87275	- 84.65495
+diff_6 <- 131.5567 - 114.9787	
 diff_6
-# Comparing the model evalution based on above, we can see that prcp, month and O3 has good impact
+# Comparing the model evalution based on above, we can see that prcp, month and CO has good impact
 # on the delay
 
 ## To evaluate the base model, split the data into test and train datasets
@@ -1751,9 +1962,9 @@ train_dataset  <- Delhi_cohesive_dataset[sample_set, ]
 test_dataset   <- Delhi_cohesive_dataset[!sample_set, ]
 
 # the base model with just AQI and tavg
-Base_Model_Delay = lm(Daily_Delay ~ AQI+prcp, data = train_dataset)
+Base_Model_Delay = lm(Daily_Delay ~ AQI+prcp+CO, data = train_dataset)
 # the Augmented model with precipitation as well
-Aug_Model_Delay = lm(Daily_Delay ~ AQI+prcp+Month, data = train_dataset)
+Aug_Model_Delay = lm(Daily_Delay ~ AQI+prcp+CO+Month, data = train_dataset)
 # Run cross validation trials on the two models
 trials <- cv_pred_error(Base_Model_Delay, Aug_Model_Delay)
 
@@ -1761,15 +1972,15 @@ trials <- cv_pred_error(Base_Model_Delay, Aug_Model_Delay)
 # Compare the two sets of cross-validated errors
 t.test(mse ~ model, data = trials)
 
-# t-statistic is -2.8426. degrees of freedom, df is 5.7322 are the degrees of freedom. These are used with a t-distribution to derive p-value of 0.03099
+# t-statistic is 2.7891. degrees of freedom, df is 6.6445 are the degrees of freedom. These are used with a t-distribution to derive p-value of 0.02842
 
-# p-value = 0.03099 - i.e., Given that there is no actual/true difference in means, if we repeat the experiment over and over again, 3.1% of the time we would see the type of difference in means as in your samples, or a more extreme difference in means. Since p value is significantly lower than 0.05, the differences are significant.
+# p-value = 0.02842 - i.e., Given that there is no actual/true difference in means, if we repeat the experiment over and over again, 2.8% of the time we would see the type of difference in means as in your samples, or a more extreme difference in means. Since p value is significantly lower than 0.05, the differences are significant.
 # So we can reject the null hypothesis (H0) of no difference between the (true) averages of the two groups
 #alternative hypothesis: true difference in means is not equal to 0
 #95 percent confidence interval:
-# -185.63143 1-12.83777
-#If assume H0 is false, the true mean may lie in the interval [3091.307 3190.542].
-# So we will chose the augmented model - i.e., Daily_Delay ~ AQI+prcp+Mont
+# 25.04453 325.43691
+#If assume H0 is false, the true mean may lie in the interval [7866.835 7691.594].
+# So we will chose the augmented model - i.e., Daily_Delay ~ AQI+prcp+CO+Month
 
 ```
 
@@ -1777,11 +1988,11 @@ t.test(mse ~ model, data = trials)
 ```{r}
 ## For our model to predict the air traffic delays:
 ## Response Variable is Daily_Delay
-## Explanatory Variables are Precipitation (prcp), AQI and Month
+## Explanatory Variables are Precipitation (prcp), AQI, CO and Month
 
 ## We are choosing a linear regression model here because this is about predicting the numerical values
 ## and does not belong to classification modelling
-Delhi_Traffic_Delay_Model = lm(Daily_Delay ~ AQI+prcp+Month, data = train_dataset)
+Delhi_Traffic_Delay_Model = lm(Daily_Delay ~ AQI+prcp+CO+Month, data = train_dataset)
 summary(Delhi_Traffic_Delay_Model)
 
 Predicted_Traffic_Delay <- predict(Delhi_Traffic_Delay_Model, test_dataset)
