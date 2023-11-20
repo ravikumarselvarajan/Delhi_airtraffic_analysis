@@ -1470,6 +1470,23 @@ t.test(mse ~ model, data = trials)
 ## We are choosing a linear regression model here because this is about predicting the numerical values
 ## and does not belong to classification modelling
 Delhi_Traffic_Delay_Model = lm(Daily_Delay ~ AQI+prcp+Month, data = train_dataset)
+summary(Delhi_Traffic_Delay_Model)
 
+Predicted_Traffic_Delay <- predict(Delhi_Traffic_Delay_Model, test_dataset)
+Predicted_Traffic_Delay
 
+test_dataset["Predicted_Delay"] <- Predicted_Traffic_Delay
+View(test_dataset)
+
+Summary_Model_Performace <- test_dataset %>% group_by(YEAR = year(ymd(Date)), Month) %>% summarise(Daily_Delay, Predicted_Delay)
+Summary_Model_Performace
+
+ggplot(Summary_Model_Performace, aes(x = Month)) +
+        geom_point(aes(y = Daily_Delay, color = 'Daily_Delay')) +
+        geom_point(aes(y = Predicted_Delay, color = 'Predictede_Delay')) +
+         scale_x_continuous(breaks=seq(1, 12, by = 1))+
+  labs(title = "Model Performance")  + facet_wrap(~YEAR)
+
+# As we can see, the model is performing a bit OK for some months except for certain extreme
+# cases of delays. So, the model needs further fine tuning or dataset needs to be reanalyzed.
 ```
