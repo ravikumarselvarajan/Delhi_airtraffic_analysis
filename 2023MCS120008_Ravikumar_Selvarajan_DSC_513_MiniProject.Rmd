@@ -1281,7 +1281,7 @@ Delhi_Airport_Delay_datewise
 
 Delhi_AQI_weather_data_merge_temp <- merge(New_Weather_Delhi_day, Delhi_AQI_data)
 Delhi_AQI_weather_data_merge_temp_1 <- Delhi_AQI_weather_data_merge_temp[,-2]
-Delhi_cohesive_dataset <- merge(Delhi_AQI_weather_data_merge_temp_1, Delhi_Airport_Delay_datewise)
+Delhi_cohesive_dataset <- merge(Delhi_AQI_weather_data_merge_temp_1, Delhi_Airport_Delay_datewise)%>% mutate(Month = month(ymd(Date)))
 Delhi_AQI_weather_data_merge_temp_1
 Delhi_cohesive_dataset
 #Looks like the merger is successful with no NA
@@ -1366,34 +1366,110 @@ ggplot(Delhi_cohesive_dataset, aes(x = AQI, y = Daily_Delay, size = AQI, color=A
   geom_point() +
   labs(title = "Impact of AQI")
 
+
 ## Looks like a lot of low intensity delays on higher Tmin...
+
+## Lets see if the months itself has any impact on the delay
+
+ggplot(Delhi_cohesive_dataset, aes(x = Month, y = Daily_Delay, size = Daily_Delay)) +
+  geom_point()+ scale_x_continuous(breaks=seq(1, 12, by = 1))+
+  labs(title = "Impact of Month")
+
+## Looks like there is high frequency of delays during monsoon and heavy delay during peak winter season
+
 
 ## Ok based on this, lets pick these elements to find the right model on impacts the delays of Delhi airtraffic:
 ## Precipitation, AQI, tmin, O3 and CO
 
 ## Lets see how the elements individually have linear regression relationship with the traffic delay
 
+
+## Ok lets build the base model here
 Delhi_Traffic_Delay_Model_AQI = lm(Daily_Delay ~ AQI, data = Delhi_cohesive_dataset)
 fmodel(Delhi_Traffic_Delay_Model_AQI)
 
-Delhi_Traffic_Delay_Model_tavg = lm(Daily_Delay ~ tavg, data = Delhi_cohesive_dataset)
+Delhi_Traffic_Delay_Model_tavg = lm(Daily_Delay ~ AQI+tavg, data = Delhi_cohesive_dataset)
 fmodel(Delhi_Traffic_Delay_Model_tavg)
 
-Delhi_Traffic_Delay_Model_prcp = lm(Daily_Delay ~ prcp, data = Delhi_cohesive_dataset)
+Delhi_Traffic_Delay_Model_prcp = lm(Daily_Delay ~ AQI+prcp, data = Delhi_cohesive_dataset)
 fmodel(Delhi_Traffic_Delay_Model_prcp)
 
-Delhi_Traffic_Delay_Model_O3 = lm(Daily_Delay ~ O3, data = Delhi_cohesive_dataset)
+Delhi_Traffic_Delay_Model_O3 = lm(Daily_Delay ~ AQI+O3, data = Delhi_cohesive_dataset)
 fmodel(Delhi_Traffic_Delay_Model_O3)
 
-Delhi_Traffic_Delay_Model_CO = lm(Daily_Delay ~ CO, data = Delhi_cohesive_dataset)
+Delhi_Traffic_Delay_Model_CO = lm(Daily_Delay ~ AQI+CO, data = Delhi_cohesive_dataset)
 fmodel(Delhi_Traffic_Delay_Model_CO)
+
+Delhi_Traffic_Delay_Model_Month = lm(Daily_Delay ~ AQI+Month, data = Delhi_cohesive_dataset)
+fmodel(Delhi_Traffic_Delay_Model_Month)
+
+
+evaluate_model(Delhi_Traffic_Delay_Model_AQI)
+evaluate_model(Delhi_Traffic_Delay_Model_tavg, tavg = 35)
+evaluate_model(Delhi_Traffic_Delay_Model_prcp, prcp = 150)
+evaluate_model(Delhi_Traffic_Delay_Model_O3, O3 = 50)
+evaluate_model(Delhi_Traffic_Delay_Model_CO, CO = 1)
+evaluate_model(Delhi_Traffic_Delay_Model_Month, Month = 12)
+
+diff_1 <- 75.90179 - 65.89103
+diff_1
+diff_2 <- 74.13083 - 65.28536	
+diff_2
+diff_3 <- 221.3815 - 207.8647
+diff_3
+diff_4 <- 86.52229 - 75.87323
+diff_4
+diff_5 <- 76.02051 - 66.60121
+diff_5
+diff_6 <- 100.87275	- 84.65495
+diff_6
+# Comparing the model evalution based on above, we can see that prcp, month and O3 has good impact
+# on the delay
+
+## To evaluate the base model, split the data into test and train datasets
+
+#make this split reproducible
+set.seed(1)
+
+#Use 70% of dataset as training set and remaining 30% as testing set
+sample_set <- sample(c(TRUE, FALSE), nrow(Delhi_cohesive_dataset), replace=TRUE, prob=c(0.7,0.3))
+train_dataset  <- Delhi_cohesive_dataset[sample_set, ]
+test_dataset   <- Delhi_cohesive_dataset[!sample_set, ]
+View(train_dataset)
+View(test_dataset)
+
+# the base model with just AQI and tavg
+Base_Model_Delay = lm(Daily_Delay ~ AQI+prcp, data = train_dataset)
+# the Augmented model with precipitation as well
+Aug_Model_Delay = lm(Daily_Delay ~ AQI+prcp+Month, data = train_dataset)
+# Run cross validation trials on the two models
+trials <- cv_pred_error(Base_Model_Delay, Aug_Model_Delay)
+
+
+# Compare the two sets of cross-validated errors
+t.test(mse ~ model, data = trials)
+
+# t-statistic is -2.8426. degrees of freedom, df is 5.7322 are the degrees of freedom. These are used with a t-distribution to derive p-value of 0.03099
+
+# p-value = 0.03099 - i.e., Given that there is no actual/true difference in means, if we repeat the experiment over and over again, 3.1% of the time we would see the type of difference in means as in your samples, or a more extreme difference in means. Since p value is significantly lower than 0.05, the differences are significant.
+# So we can reject the null hypothesis (H0) of no difference between the (true) averages of the two groups
+#alternative hypothesis: true difference in means is not equal to 0
+#95 percent confidence interval:
+# -185.63143 1-12.83777
+#If assume H0 is false, the true mean may lie in the interval [3091.307 3190.542].
+# So we will chose the augmented model - i.e., Daily_Delay ~ AQI+prcp+Mont
+
 ```
 
 ## Model for predicting Delhi air traffic delays
 ```{r}
+## For our model to predict the air traffic delays:
+## Response Variable is Daily_Delay
+## Explanatory Variables are Precipitation (prcp), AQI and Month
 
+## We are choosing a linear regression model here because this is about predicting the numerical values
+## and does not belong to classification modelling
+Delhi_Traffic_Delay_Model = lm(Daily_Delay ~ AQI+prcp+Month, data = train_dataset)
 
-Delhi_Traffic_Delay_Model = lm(Daily_Delay ~ prcp+CO+tavg, data = Delhi_cohesive_dataset)
-fmodel(Delhi_Traffic_Delay_Model)
 
 ```
