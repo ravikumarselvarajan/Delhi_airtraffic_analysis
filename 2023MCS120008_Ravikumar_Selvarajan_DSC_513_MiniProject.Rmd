@@ -1,9 +1,20 @@
 ---
-title: "2023MCS120008_Ravikumar_Selvarajan_DSC_513_MiniProject"
+title: "Modelling AQI, weather and Delhi Air Traffic Delay "
 author: "2023MCS120008_Ravikumar_Selvarajan"
 date: "11/19/2023"
 output: html_document
 ---
+# Objectives:
+
+# - To derive the parameters that impacts the precipitation behavior in terms of quantity and temporal behavior
+# - To derive the behavioral pattern of AQI and to identify the top parameters that influences the AQI
+# - To study the influence weather has on AQI and arrive at a model to predict the AQI given the other parameters   are known
+# - To study the impact of weather and AQI on air traffic delays at Delhi airport
+# - To deduce two or more models using which one can predict at the traffic delays if we know the AQI components/weather
+# - To finalize one mode, and then train, test and evaluate the model's performance for traffic delay prediction
+# - Via this we would also like to find out if the following hypothesis is true:
+#   a. Precipitation impacts Traffic
+#   b. High AQI during winter causes smog which will impact Traffic
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -36,7 +47,40 @@ AQ_city_hour <- read.csv("./datasets/city_hour.csv")
 Airport_delay <- read.csv("./Aiport_Delay.csv")
 ```
 
-##Exploratory Data Analysis
+## Preliminary analysis:
+
+## Under this section we will be performing cleaning of the data and exploratory data analysis.
+
+## For every dataset, we are performing the following steps:
+## - Observe the dimensions of the dataset
+## - Have a glimpse of the dataset which will give a quick overview of the overall structure
+## - Have a quick look at the top 6 and bottom 6 entires of the dataset
+## - Checkout the column names to understand the fields that constitute the dataset
+## - Study the structure of the dataset
+## - Look at the Summary of dataset which will talk about each and every field with their charactersticks such as mean, max, min, NAs, class, etc.
+
+## Then conduct detailed study of the missing parameters which includes the following: 
+## - Get the total number of missing parameters
+## - Study the Variable level missingness summary
+## - Study the running span of the Missingness of key variables
+## - Visualise missingness including their percentage
+## - Visulaize the missing data via plot
+## - Study the heat map of missingness of critical parameters
+## - Visualize span of prcp missingness
+## - Check for all types of missingness including "N/A", "NA", "na", " ","missing"
+
+## Conduct study the relationship/dependencies of the missing data with other data in the dataset:
+## - Create a shadow matrix of the dataset
+## - Create nabular data by binding the shadow to the data
+## - Bind the shadow only with missing columns and summarize the missing elements with the other parameters
+## - Plot this relationship via ggplot and visualize the impact
+## - Explore the missingness in various parameters, and display the missingness using `geom_miss_point'
+
+## Perform imputations in two ways:
+## - impute_all where all the missing data gets replaced with a value below the range by 10%. Ensure we can track the imputations.
+##   visualize and study the impact of imputations over the dataset
+## - impute via linear regression mechanism in relationship with other explanatory parameters visualize and study the impact of imputations over the dataset
+
 
 ##Analysing Station_GeoLocation_Longitute_Latitude_Elevation_EPSG_4326.csv
 ```{r}
@@ -94,7 +138,7 @@ summary(Weather_Bangalore)
 ## Lets analyse the missing data of the dataset
 n_miss(Weather_Bangalore) ## Total number of missing parameters
 miss_var_summary(Weather_Bangalore) ## Missingness summary
-miss_var_span(Weather_Bangalore, var = prcp, span_every = 250) ## Missingness spread
+miss_var_span(Weather_Bangalore, var = prcp, span_every = 250) ## Missingness span
 miss_var_table(Weather_Bangalore)
 vis_miss(Weather_Bangalore) ## visualise % of missing
 gg_miss_upset(Weather_Bangalore) ## plot for missing data
@@ -142,7 +186,7 @@ ggplot(Weather_Bangalore_imp_track, aes(x = tmin, fill = tmin_NA)) + geom_histog
 
 ggplot(Weather_Bangalore_imp_track, aes(x = tavg, y = prcp, color = prcp_NA)) + geom_point()
 
-## So we can successfully imputed all the NA values here
+## So we have successfully imputed all the NA values here
 
 # Now lets fix the important the critically missing parameters prcp and lm 
 # via linear regression mechanism in relationship with other explanatory parameters
@@ -184,14 +228,14 @@ sum(is.na(Weather_Chennai))
 ## Lets analyse the missing data of the dataset
 n_miss(Weather_Chennai) ## Total number of missing parameters
 miss_var_summary(Weather_Chennai) ## Missingness summary
-miss_var_span(Weather_Chennai, var = prcp, span_every = 250) ## Missingness spread
+miss_var_span(Weather_Chennai, var = prcp, span_every = 250) ## Missingness span
 miss_var_table(Weather_Chennai)
 vis_miss(Weather_Chennai) ## visualise % of missing
 gg_miss_upset(Weather_Chennai) ## plot for missing data
 gg_miss_fct(x = Weather_Chennai, fct = prcp) ## Heat map of missingness
 gg_miss_span(Weather_Chennai, var = prcp, span_every = 250) ## Visualize span of prcp missingness
 
-## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+## With this we can clearly see the precipitation data is missing a lot (41%), followed by tmin
 miss_scan_count(data = Weather_Chennai, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
 
 ##Create shadow matrix data
@@ -279,7 +323,7 @@ gg_miss_upset(Weather_Delhi) ## plot for missing data
 gg_miss_fct(x = Weather_Delhi, fct = prcp) ## Heat map of missingness
 gg_miss_span(Weather_Delhi, var = prcp, span_every = 250) ## Visualize span of prcp missingness
 
-## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+## With this we can clearly see the precipitation data is missing a lot (51%), followed by tmin
 miss_scan_count(data = Weather_Delhi, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
 
 ##Create shadow matrix data
@@ -641,7 +685,9 @@ gg_miss_upset(Weather_Bhubhneshwar) ## plot for missing data
 gg_miss_fct(x = Weather_Bhubhneshwar, fct = prcp) ## Heat map of missingness
 gg_miss_span(Weather_Bhubhneshwar, var = prcp, span_every = 250) ## Visualize span of prcp missingness
 
-## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+## With this we can clearly see the precipitation data is missing a lot (42.7%)
+## Actually there are other datasets which have huge missing data like snow - but these are almost meaningless 
+## datasets and hence we are not bothered too much about them
 miss_scan_count(data = Weather_Bhubhneshwar, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
 
 ##Create shadow matrix data
@@ -715,7 +761,9 @@ gg_miss_upset(Weather_Rourkela) ## plot for missing data
 gg_miss_fct(x = Weather_Rourkela, fct = prcp) ## Heat map of missingness
 gg_miss_span(Weather_Rourkela, var = prcp, span_every = 250) ## Visualize span of prcp missingness
 
-## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+## With this we can clearly see the precipitation data is missing a lot (70%)
+## Actually there are other datasets which have huge missing data like snow - but these are almost meaningless 
+## datasets and hence we are not bothered too much about them
 Weather_Rourkela
 miss_scan_count(data = Weather_Rourkela, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
 
@@ -748,7 +796,7 @@ facet_wrap(~year(dmy(time)))
 
 ```
 
-
+## With the analysis of the weather data so far, we have seen that the precipitation is the most missing parameter and it followed Missing At Random (MAR pattern) - as they are missing consistently by more than 35% and will have severe impact on the data quality if not imputed. So in all of them we have cleaned them up by doing both impute_all and also by using linear regression method - and both the results are sasitfactory which we have verified using various plots. Now we will go ahead and look at the AQI datasets.
 
 
 ##Analysing AQI stations: stations.csv
@@ -807,7 +855,7 @@ AQ_station_hour [AQ_station_hour == ""] <- NA
 ## SO2:499302    O3:742737    Benzene:725973  Toluene:861579  Xylene:1042366
 
 AQ_station_hour %>% group_by(AQI_Bucket)%>%count()
-## Looks like Moderate entries are the highest ones but second highest is NA entries...
+
 ## Lets analyse the missing data of the dataset
 n_miss(AQ_station_hour) ## Total number of missing parameters
 miss_var_summary(AQ_station_hour) ## Missingness summary
@@ -816,9 +864,10 @@ miss_var_table(AQ_station_hour)
 ## vis_miss(AQ_station_hour) Unable to visualise % of missing due to large data size
 gg_miss_upset(AQ_station_hour) ## plot for missing data
 gg_miss_fct(x = AQ_station_hour, fct = AQI) ## Heat map of missingness
-gg_miss_span(AQ_station_hour, var = AQI, span_every = 250) ## Visualize span of prcp missingness
+gg_miss_span(AQ_station_hour, var = AQI, span_every = 250) ## Visualize span of AQI missingness
 
-## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+## With this we can clearly see the AQI data is missing a lot (22%)
+## There are other dataset missing heavily as well but for us AQI is the single most critical dataset
 miss_scan_count(data = AQ_station_hour, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
 
 ##Create shadow matrix data
@@ -827,7 +876,7 @@ head(as_shadow(AQ_station_hour))
 #Create nabular data by binding the shadow to the data
 head(bind_shadow(AQ_station_hour, only_miss = TRUE))
 
-# Lets explore the relations ship with the missing values
+# Lets explore the relations ship with the other key missing values
 AQ_station_hour %>%
 bind_shadow(only_miss = TRUE) %>%
 group_by(AQI_NA) %>%
@@ -899,7 +948,7 @@ AQ_station_day %>% group_by(AQI_Bucket)%>%count()
 ## but third highest is NA entries...
 
 AQ_station_day %>% group_by(AQI_Bucket)%>%count()
-## Looks like Moderate entries are the highest ones but second highest is NA entries...
+
 ## Lets analyse the missing data of the dataset
 n_miss(AQ_station_day) ## Total number of missing parameters
 miss_var_summary(AQ_station_day) ## Missingness summary
@@ -908,9 +957,10 @@ miss_var_table(AQ_station_day)
 ## vis_miss(AQ_station_day) Unable to visualise % of missing due to large data size
 gg_miss_upset(AQ_station_day) ## plot for missing data
 gg_miss_fct(x = AQ_station_day, fct = AQI) ## Heat map of missingness
-gg_miss_span(AQ_station_day, var = AQI, span_every = 250) ## Visualize span of prcp missingness
+gg_miss_span(AQ_station_day, var = AQI, span_every = 250) ## Visualize span of AQI missingness
 
-## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+## With this we can clearly see the AQI data is missing a lot (19%)
+## There are other dataset missing heavily as well but for us AQI is the single most critical dataset
 miss_scan_count(data = AQ_station_day, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
 
 ##Create shadow matrix data
@@ -986,11 +1036,11 @@ AQ_city_day [AQ_city_day == ""] <- NA
 ## PM2.5: 4598  PM10: 11140  NO: 3582  NO2: 3585 NOx: 4185 NH3: 10328 
 ## CO: 2059  SO2: 3854 O3: 4022  Benzene: 5623  Toluene: 8041 Xylene: 18109
 AQ_city_day %>% group_by(AQI_Bucket)%>%count()
-## Looks like Moderate entries are the highest ones, followed by Satisfactory 
+
 ## but third highest is NA entries...
 
 AQ_city_day %>% group_by(AQI_Bucket)%>%count()
-## Looks like Moderate entries are the highest ones but second highest is NA entries...
+
 ## Lets analyse the missing data of the dataset
 n_miss(AQ_city_day) ## Total number of missing parameters
 miss_var_summary(AQ_city_day) ## Missingness summary
@@ -999,9 +1049,10 @@ miss_var_table(AQ_city_day)
 ## vis_miss(AQ_city_day) Unable to visualise % of missing due to large data size
 gg_miss_upset(AQ_city_day) ## plot for missing data
 gg_miss_fct(x = AQ_city_day, fct = AQI) ## Heat map of missingness
-gg_miss_span(AQ_city_day, var = AQI, span_every = 250) ## Visualize span of prcp missingness
+gg_miss_span(AQ_city_day, var = AQI, span_every = 250) ## Visualize span of AQI missingness
 
-## With this we can clearly see the precipitation data is missing a lot (39%), followed by tmin
+## With this we can clearly see the AQI data is missing a lot (15%)
+## There are other dataset missing heavily as well but for us AQI is the single most critical dataset
 miss_scan_count(data = AQ_city_day, search = list("N/A", "NA", "na", " ","missing")) ## No empty cells
 
 ##Create shadow matrix data
@@ -1138,6 +1189,7 @@ AQ_city_hour_imp_lm_temp <- AQ_city_hour %>% bind_shadow() %>% impute_lm(AQI ~ C
 ggplot(AQ_city_hour_imp_lm_temp, aes(x = CO, y = AQI, color = any_missing)) + geom_miss_point()
 
 ```
+## At this point of time, we have completed preliminary analysis of the AQI datasets as well. We have witnessed plenty of missing data amongst various parameters but for us single most important data is AQI. So we have worked on both imputing all using 10% impute_all method and then imputing AQI via employing linear regression around the other important explanatory variables. After the cleaning, the dataset looks very promising to take it to next level
 
 ##Analysing Airport_delay: Aiport_Delay.csv
 ```{r}
@@ -1169,7 +1221,6 @@ Airport_delay %>% group_by(Arrival.Airport, Arrival.Airport.On.Time.Rating..out.
 ##Mumbai seems to have the worst rating for Arrival on time performance as well
 
 ```
-
 
 
 ## Further Cleaning Datasets over imputations done previously
@@ -1205,12 +1256,8 @@ New_AQ_city_day <- AQ_city_day_imp_lm_temp[complete.cases(AQ_city_day),]
 New_Airport_delay <- Airport_delay[complete.cases(Airport_delay),]
 
 ```
-## Detect outliers on Datasets
-## Since one of the hypothesis we have here is that extreme weather conditions 
-## will affect the flight traffic, we are  really looking for outliers unlike 
-## normal cases where we tend to avoid outliers
-
-## Exploratoray Analysis of Bangalore Weather Dataset
+## Detailed analysis of the Datasets
+## Lets try to understand the outliers a bit on the weather as they tend to impact the behaviors of the heavy precipitation which is assumed to be one of the primary reasons behind air traffic delay
 ```{r}
 hist(x=New_Weather_Bangalore$tavg, main = "Bangalore Average Temparature")
 ## Data outside <20 and >30 are outliers for Bangalore average 
@@ -1244,8 +1291,9 @@ ggplot(Ext_Special_Weather_Bangalore, aes(x = tmin,
                      color = prcp)) +
   geom_point(size = Ext_Special_Weather_Bangalore$prcp/75) +
   labs(title = "Impact of temperature on precipitation")
-```
 
+## As per the plot, except for one heavy precipitation for a lower tmin/tmax around 18/20, most precipitations occurs when tmax is between 28 to 33 and tmin is between 19 to 22.
+```
 ## Exploratory Analysis of Chennai Weather Dataset
 ```{r}
 hist(x=New_Weather_Chennai$tavg, main = "Chennai Average Temparature")
@@ -1281,6 +1329,7 @@ ggplot(Ext_Special_Weather_Chennai, aes(x = tmin,
   geom_point(size = Ext_Special_Weather_Chennai$prcp/75) +
   labs(title = "Impact of temperature on precipitation")
 
+## As per the plot, most precipitations occurs when tmax is between 25 to 33 and tmin is between 20 to 24.
 ```
 
 ## Exploratory Analysis of Delhi Weather Dataset
@@ -1317,6 +1366,8 @@ ggplot(Ext_Special_Weather_Delhi, aes(x = tmin,
                      color = prcp)) +
   geom_point(size = Ext_Special_Weather_Delhi$prcp/75) +
   labs(title = "Impact of temperature on precipitation")
+
+## As per the plot, most precipitations occurs when tmax is between 25 to 35 and tmin is between 23 to 27.
 ```
 
 
@@ -1354,6 +1405,7 @@ ggplot(Ext_Special_Weather_Lucknow, aes(x = tmin,
                      color = prcp)) +
   geom_point(size = Ext_Special_Weather_Lucknow$prcp/75) +
   labs(title = "Impact of temperature on precipitation")
+## As per the plot, most precipitations occurs when tmax is between 27 to 37 and tmin is between 22 to 25.
 ```
 
 ## Exploratory Analysis of Mumbai Weather Dataset
@@ -1390,6 +1442,7 @@ ggplot(Ext_Special_Weather_Mumbai, aes(x = tmin,
                      color = prcp)) +
   geom_point(size = Ext_Special_Weather_Mumbai$prcp/75) +
   labs(title = "Impact of temperature on precipitation")
+## As per the plot, most precipitations occurs when tmax is between 25 to 33 and tmin is between 22 to 26.
 ```
 
 ## Exploratory Analysis of Jodhpur Weather Dataset
@@ -1426,6 +1479,7 @@ ggplot(Ext_Special_Weather_Jodhpur, aes(x = tmin,
                      color = prcp)) +
   geom_point(size = Ext_Special_Weather_Jodhpur$prcp/75) +
   labs(title = "Impact of temperature on precipitation")
+## As per the plot, most precipitations occurs when tmax is between 22 to 33 and tmin is between 18 to 21.
 ```
 
 ## Exploratory Analysis of Bhubhenshwar Weather Dataset
@@ -1462,6 +1516,7 @@ ggplot(Ext_Special_Weather_Bhubhenshwar, aes(x = tmin,
                      color = prcp)) +
   geom_point(size = Ext_Special_Weather_Bhubhenshwar$prcp/75) +
   labs(title = "Impact of temperature on precipitation")
+## As per the plot, most precipitations occurs when tmax is between 25 to 35 and tmin is between 22 to 25.
 ```
 
 ## Exploratory Analysis of Rourkela Weather Dataset
@@ -1499,8 +1554,10 @@ ggplot(Ext_Special_Weather_Rourkela, aes(x = tmin,
   geom_point(size = Ext_Special_Weather_Rourkela$prcp/75) +
   labs(title = "Impact of temperature on precipitation")
 
-```
+## Precipitation is too low quantity to derive anything meaningful here
 
+```
+## So based on all these weather data analysis, we can conclude here that precipitation is high influenced by temperature and there are more likelyhood of rain when the temperature is high - i.e., even for tmin it should be above 19 or 20 for most of the cases while tmax hovers around 330 - 35. So temperature has a important role in influencing the precipitation and hence tavg can be considered an important parameter for further modelling from here.
 
 
 ## Exploratory Analysis of AQI data station wise
@@ -1624,7 +1681,7 @@ ggplot(New_AQ_city_day_Years, aes(x = Month, y = Mean_AQI))+  geom_point(aes(col
 
 New_AQ_station_hour_sep <- New_AQ_station_hour %>% separate(Datetime, c('Date', 'Time'), sep =" ") %>% separate(Time, c('Hr', 'Min', 'Sec'), sep=":") %>% mutate(Hour = as.numeric(Hr), Month = month(ymd(Date)))
 
-## Now lets focus on the months where we have the most troubles with AQI - Oct to Feb
+## Now lets focus on the months where we have the most troubles with AQI - Oct to Feb - lets call them Bad Months
 New_AQ_station_hour_sep_BM <- New_AQ_station_hour_sep %>% filter ((Month == 1) | (Month == 2) | (Month == 10) | (Month == 11) | (Month == 12))
 
 AQI_O3_model <- lm(AQI~O3, data = New_AQ_station_hour_sep)
@@ -1674,7 +1731,7 @@ AQI_NH3_model <- lm(AQI~NH3, data = New_AQ_station_hour_sep)
 fmodel(AQI_NH3_model)
 AQI_NH3_model_BM <- lm(AQI~NH3, data = New_AQ_station_hour_sep_BM)
 fmodel(AQI_NH3_model_BM)
-## PM2.5 impact seems to be much higher (50% more) over the winter months
+## NH3 impact seems to be much higher (50% more) over the winter months
 
 AQI_CO_model <- lm(AQI~CO, data = New_AQ_station_hour_sep)
 fmodel(AQI_CO_model)
@@ -1717,7 +1774,7 @@ fmodel(AQI_High_Impact_model_BM)
 evaluate_model(AQI_High_Impact_model)
 evaluate_model(AQI_High_Impact_model_BM)
 
-## Defintely bad months brings in a lot of diffeence into the data set.
+## Defintely bad months brings in a lot of differnce into the AQI behavior
 ## So lets consider even months as one explanatory variables
 New_AQ_station_hour_sep
 AQI_High_Impact_model_Month <- lm(AQI~O3+CO+month(ymd(Date)), data = New_AQ_station_hour_sep)
@@ -1759,6 +1816,8 @@ ggplot(Summary_AQI_Model_Performace, aes(x = Month)) +
 ## month of the year and quantities of O3 and CO.
 
 ```
+
+## At the end of the analysis of the AQI datasets, here are our observations 
 
 ## Form a cohesive Delhi dataset
 ```{r}
@@ -1843,7 +1902,7 @@ ggplot(Delhi_cohesive_dataset, aes(x = tavg, y = Daily_Delay, color = tmin, size
 ## But its also interesting to find that higher tavg, higher precipitation and higher tmin bring 
 # in a lot of delays - though size of precipitation does not always result in costly delays
 
-## Ok Lets also analyse if the components O3, PM2.5 and CO has impacts on delays
+## Ok Lets also analyse if the components O3, PM2.5, PM10, CO, tavg, tmin, AQI has impacts on delays individually
 
 ggplot(Delhi_cohesive_dataset, aes(x = O3, y = Daily_Delay, size = O3)) +
   geom_point() +
@@ -1904,7 +1963,7 @@ ggplot(Delhi_cohesive_dataset, aes(x = Month, y = Daily_Delay, size = Daily_Dela
 
 
 ## Ok based on this, lets pick these elements to find the right model on impacts the delays of Delhi airtraffic:
-## Precipitation, AQI, tmin, O3 and CO
+## Precipitation, AQI, tmin, O3, CO and month
 
 ## Lets see how the elements individually have linear regression relationship with the traffic delay
 
@@ -2012,3 +2071,93 @@ ggplot(Summary_Model_Performace, aes(x = Month)) +
 # As we can see, the model is performing a bit OK for some months except for certain extreme
 # cases of delays. So, the model needs further fine tuning or dataset needs to be reanalyzed.
 ```
+
+##### Detailed analysis:
+
+#  The air quality seems to be dependent on 12 parameters.
+# - AQI when in worst conditions, is highest during night time, lowest during early morning 
+# - AQI when not in worst conditions, is highest during day time, lowest during early morning
+# - AQI were at its worst during winter, intermediate during Summer but the best during monsoon times
+# - Across various stations too, the trend seems to be the same for AQI values - i.e., worst during winter, intermediate values during spring/summer, best values during monsoon.
+# There seems to be small difference when comparing hour wise data to day wise data, but not significant enough. So we will live with the hour wise data itself for further AQI modelling and analysis.
+ 
+# We would like to understand which are the parameters are really affecting AQI value. Among all the parameters, the highest difference in impact for winter seems to be from PM25.5, CO and O3. We created two linear regression models with response variable as AQI and explanatory variables as PM2.5, O3, CO and month.
+
+# There are a good amount overlaps between the AQI prediction vs actual data though there is still a very large scope of improvement of the model - esp when dealing with outliers. But so far we have sufficient proof available that AQI is heavily influenced by month of the year and quantities of O3 and CO.
+
+# Now we made a cohesive dataset for analysing Delhi air traffic delay and make a model for the same. We have the following observations: it appears that most of Air traffic delays are due to precipitation but AQI does impact traffic delays when it is in "Severe" category. Its also interesting to find that higher tavg, higher precipitation and higher tmin bring in a lot of delays - though size of precipitation does not always result in costly delays.
+
+# Now the impact of various components on traffic delays individually revealed that these parameters have the highest influence on air traffic delays: Precipitation, AQI, tmin, O3, CO and month. We created two models - based model with Daily_Delay ~ AQI+prcp+CO and Augmented model with AQI+prcp+CO+Month. We then split the comprehensive Delhi_cohesive_dataset into two: 70% for training dataset and 30% for test dataset. We then calculated predicted error and conducted to sample Welch t test which gave the following results:
+
+# t-statistic is 2.7891. degrees of freedom, df is 6.6445 are the degrees of freedom. These are used with a t-distribution to derive p-value of 0.02842. So we chose the augmented model - i.e., Daily_Delay ~ AQI+prcp+CO+Month as the final model
+
+# For our model to predict the air traffic delays: Response Variable is Daily_Delay, Explanatory Variables are Precipitation (prcp), AQI, CO and Month. We are choosing a linear regression model here because this is about predicting the numerical values and does not belong to classification modelling. Now we trained the model with training dataset, and then predicted the delay over test dataset. We then plotted the predicted delay vs the actual delay. The model performed well except for certain extreme cases of delays. 
+
+##### Outcomes #####
+
+# We successfully derived the parameters that impacts the precipitation behavior in terms of quantity and temporal behavior - ie., we saw that temperature had a major role to play in precipitation and higher temperature (tmin > 19, tmax > 30) was associated with higher precipitation
+# We had succesfully derived the behavioral patterms of AQI: AQI was lowest during early morning, highest during day time when AQI is high/highest during evenings when AQI is lower. AQI was worst during winter months, intermediate during summer/spring and best during monsoon times. AQI seems to be most influenced by PM2.5, O3 and CO. This was further confirmed via lm models
+# We have studied the impact of weather and AQI on air traffic delays at Delhi airport. It appears that precipitation has higher impact on delays than AQI - except for "Severe" cases of AQI which directly impacts air traffic delays.
+# We deduced two models for predicting Air traffic delay and chose the best model to be the one constituting of is Daily_Delay, Explanatory Variables are Precipitation (prcp), AQI, CO and Month as response variables.
+# It appears that the hypothesis of Precipitation impacts Air Traffic to be true
+# It appears that AQI which is having "severe" cases  during winter causes smog impacting Air Traffic - so this hypothesis is also seems to be true
+
+
+##### Results and Discussions  #####
+
+
+#  The air quality seems to be dependent on 12 parameters.
+# From City Hour wise data set:
+# - It appears that 'Severe' and 'Poor' AQI cases werent prevalent until 2017 from when these two gained at the behest of 'Good' AQI cases
+# - 2017 had the worst air quality index but worst was during day time in that year
+# - AQI became better after 2017 but in that duration, night time became worse than the other parts of the day.
+# - In any case, early morning always featured best AQI of the day time
+# - The colder months on India - i.e., from Oct to Feb, is when the AQI were at its worst; Summer had the AQI slightly better but the best time for AQI is in monsoon times. So it gives a hint that AQI might be lower when precipitation gets higher
+# - We can see the same trend across the years 2015 to 2020 - i.e., the colder months had the worst AQI while the monsoon has the best AQI while summer/spring time having the intermediate values
+# - Across various stations too, the trend seems to be the same for AQI values - i.e., worst during winter, intermediate values during spring/summer, best values during monsoon.
+# From City Day wise data set:
+# - It appears 2015 had peak values of AQIs, which dropped to very low in 2016, gained to half the levels back in 2017 and then gradually reducing in the years to follow, which is slightly different from what we have seen with City Hour wise dataset
+# - We can see that during 2015-2017, worst AQI was during day time but from 2018 onwards, AQI were worse during night times - but this behavior may be influenced with overall lower levels of AQIs as well
+# - But even in these cases, early morning AQI seems to be the lowest.
+# - We can see that the winter months - i.e., from Oct to Feb, the AQI is the worst, its bad during summer but it appears the best in monsoon season. The difference between stationwise data is that, here Nov seems to be the worst month while in the other dataset, Dec held the worst...
+# - We can see the same trend every year - i.e., the winter months has the worst AQI while the monsoon has the best AQI while summer/spring time having the intermediate values
+# - Across stations, the trend seems to be the same - i.e., worst during winter, intermediate during spring/summer, best during monsoon.
+# There seems to be small difference when comparing hour wise data to day wise data, but not significant enough. So we will live with the hour wise data itself for further AQI modelling and analysis.
+ 
+# We would like to understand which are the parameters are really affecting AQI value. Based on the analysis above we used the Cleaned Station hour wise datasets. Now we focussed on the months where we have the most troubles with AQI - Oct to Feb - we called them Bad Months. Here are the observations w.r.t. impact on AQI on Bad months vs impact throughout year:
+#   - In bad months looks like levels of O3 and AQI are inversely proportional
+#   - PM2.5 impact seems to be much higher over the winter months
+#   - No significant impact change in winter months for PM10
+#   - Slight reduction in winter months for NO
+#   - No significant impact change in winter months for NO2
+#   - Slight reduction in winter months for NOx
+#   - NH3 impact seems to be much higher (50% more) over the winter months
+#   - No significant impact change in winter months for CO
+#   - Slight reduction in winter months for SO2
+#   - Slight reduction in winter months for Benzene
+#   - Slight reduction in winter months for Toulene
+#   - No significant impact change in winter months for Xylene
+  
+# Among all the parameters, the highest difference in impact for winter seems to be from PM25.5, CO. But we brought in O3 as well due to their peculiar inverse impact during Winter months. So we created two linear regression models with response variable as AQI and explanatory variables as PM2.5, O3 and CO - one for overall year and one for winter months. After evaluating the models defintely Bad Months brings in a lot of differnce into the AQI behavior. So we need consider months as an important explanatory variable influencing AQI.
+
+# Now we trained the model and see if we can predict the values of AQI; Used 70% of dataset as training set and remaining 30% as testing set. We can see that there are a good amount overlaps between the AQI prediction vs actual data though there is still a very large scope of improvement of the model - esp when dealing with outliers. But so far we have sufficient proof available that AQI is heavily influenced by month of the year and quantities of O3 and CO.
+
+# Now we made a cohesive dataset for analysing Delhi air traffic delay and make a model for the same. For this we merged the Delhi Weather dataset and AQI city day dataset (Delhi stations "DL001" and "DL019"). We merged them along the 'Date' parameters. We calculated the total delay incurred on a day - including both arrival and departure delays across the airliners. 
+
+# We have the following observations:
+# - For "Good" AQIs, a lot of delay cases but thats far and few... and does not seems to have caused 'high' amount of delays
+# - Even for "Satisfactory" AQI values, huge amount of delays has been reported but most of the delays could be associated with pretty high precipitation during those days
+# - There are good amount of delays associated with "Moderate" AQI values too and they do have caused significant delays when combined with high precipitations
+# - Delay instances reduces for "Poor" AQI cases but there is a slight increase in the values of delays
+# - For "Very poor" cases, impacts on delays gets high when combined with precipitation
+# - For "Severe" cases, high impact are caused on traffic but looks like precipitation didnt play much role
+
+# So, it appears that most of delays are due to precipitation but AQI does impact traffic delays when it is in "Severe" category. Its also interesting to find that higher tavg, higher precipitation and higher tmin bring in a lot of delays - though size of precipitation does not always result in costly delays.
+
+# Now the impact of various components on traffic delays individually revealed that these parameters have the highest influence on air traffic delays: Precipitation, AQI, tmin, O3, CO and month. So we have built six models with AQI for the base models and the other models as augmentory ones. Further evaluation shown that AQI+prcp+CO+Month seems to have more influence. To check this up, we created two models - based model with Daily_Delay ~ AQI+prcp+CO and Augmented model with AQI+prcp+CO+Month. We then split the comprehensive Delhi_cohesive_dataset into two: 70% for training dataset and 30% for test dataset. We then calculated predicted error and conducted to sample Welch t test which gave the following results:
+
+# t-statistic is 2.7891. degrees of freedom, df is 6.6445 are the degrees of freedom. These are used with a t-distribution to derive p-value of 0.02842
+
+# p-value = 0.02842 - i.e., Given that there is no actual/true difference in means, if we repeat the experiment over and over again, 2.8% of the time we would see the type of difference in means as in your samples, or a more extreme difference in means. Since p value is significantly lower than 0.05, the differences are significant. So we rejected the null hypothesis (H0) of no difference between the (true) averages of the two groups alternative hypothesis: true difference in means is not equal to 0. 95 percent confidence interval: [25.04453 325.43691]. If assume H0 is false, the true mean may lie in the interval [7866.835 7691.594]. So we chose the augmented model - i.e., Daily_Delay ~ AQI+prcp+CO+Month as the final model
+
+# For our model to predict the air traffic delays: Response Variable is Daily_Delay, Explanatory Variables are Precipitation (prcp), AQI, CO and Month. We are choosing a linear regression model here because this is about predicting the numerical values and does not belong to classification modelling. Now we trained the model with training dataset, and then predicted the delay over test dataset. We then plotted the predicted delay vs the actual delay. The model performed well except for certain extreme cases of delays. So, the model needs further fine tuning or dataset needs to be reanalyzed.
